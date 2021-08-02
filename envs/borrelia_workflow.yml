@@ -1,0 +1,56 @@
+# Main environment shared by most steps
+name: borrelia_workflow
+
+channels:
+- conda-forge
+- bioconda
+- defaults
+
+dependencies:
+# External tools:
+- snakemake=6.6.0
+- curl=7.77
+- fastqc=0.11.9 
+- multiqc=1.7
+- bbmap=38.63
+- trimmomatic=0.39
+- pigz=2.3.4
+- flash2=2.2.00
+- bwa=0.7.17
+- samtools=1.13
+- picard=2.25
+- bcftools=1.9
+- vcftools=0.1.16
+- kraken=1.1.1
+- qualimap=2.2.2
+- cd-hit=4.8.1
+- blast=2.9.0
+- diamond=0.9.25
+- mafft=7.407
+- modeltest-ng=0.1.5
+- raxml-ng=0.9.0
+- pandoc=2.6-0
+
+# Python libraries:
+- numpy=1.17.0
+- pandas=0.25.0
+- pysam=0.15.3
+- ete3=3.1.1
+- biopython=1.74
+
+# R and R libraries:
+- r=3.6.1
+- r-stringi=1.4.3
+- r-tidyverse=1.2.1
+- r-rmarkdown=1.15
+- r-ggplot2=3.2.0
+- r-plotly=4.9.0
+- r-rprojroot=1.3_2
+- r-rhpcblasctl=0.18_205 
+- r-lme4=1.1_21
+- r-dfoptim=2018.2_1
+- r-visreg=2.5_1
+- r-apcluster=1.4.8
+- r-tsne=0.1_3
+- r-dt=0.5
+
