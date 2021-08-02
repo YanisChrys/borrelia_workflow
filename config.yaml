@@ -1,0 +1,30 @@
+# Random seed:
+random_seed: 23102020
+
+n_cores: 2
+
+# Location of sample metadata:
+#  - Must contain a column named 'sample' containing sample names
+metadata_file: data/metadata/SampleMetadata.csv
+
+# Regular expression to match sample IDs in the filenames used for reads
+#   - Names of alignments, etc. will be simplified to to contain only the
+#     capturing group in this regular expression
+#   - To retain the entire filename, use "(.+)"
+sample_name_regex: (RB[A-Za-z-_\d]+)
+
+# Run info:
+#  - We need to know which sequencer was used, because NextSeq has a 'tile edge duplicate' problem
+#  - Names here should match the subfolder in which reads were placed
+run_info:
+  190712_MiSeq:
+    sequencer: MiSeq
+  190823_NextSeq:
+    sequencer: NextSeq
+  batch3:
+    sequencer: NextSeq
+
+
+ref_genomes:
+  Borrelia_afzelii:
+    ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Borreliella_afzelii/latest_assembly_versions/GCF_000222835.1_ASM22283v1/GCF_000222835.1_ASM22283v1_genomic.fna.gz
