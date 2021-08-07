@@ -2,6 +2,8 @@
 
 Pipeline for mapping and calling Borrelia samples.
 
+Dependecies can be installed as a conda environment, when conda-forge and bioconda are installed, from inside a folder that has borrelia_workflow.yml and gatkPythonPackageArchive.zip 
+
 The "find_borrelia_positive_samples.sh" script takes a text file(false_positive_borrelia.txt) with all the qPCR positive files and looks for them in a folder system of the type: "data/input/multi_refs/{run_id}/"
 (none of those terminal directories can be empty or it will cause errors) and moves them to the folder "data/input/multi_refs_positive/{run_id}/"
 which will be the input of the analysis. The script also checks for false positive samples by finding how many mapped reads they have. 
