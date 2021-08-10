@@ -4,22 +4,22 @@
 # -t: copy RG, BC and QT tags to the FASTQ header line
 rule extract_paired_reads_from_bam:
 	input: 
-		"data/input/multi_refs_positive/{run_id}/{sample}.bam"
+		"data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
 		"data/input/reads/{run_id}/{sample}_paired.fastq"
 	log:
-		"logs/extract_reads_from_bam_{sample}_paired.log"
+		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
 		"samtools fastq -ntf 13 {input} > {output}"
 
 
 rule extract_singleton_reads_from_bam:
 	input: 
-		"data/input/multi_refs_positive/{run_id}/{sample}.bam"
+		"data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
 		"data/input/reads/{run_id}/{sample}_singleton.fastq"
 	log:
-		"logs/extract_reads_from_bam_{sample}_singleton.log"
+		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
 	shell:
 		"samtools fastq -ntf 4 {input} > {output}"	
 
@@ -34,7 +34,7 @@ rule bwa_map_paired_reads:
 	threads:
 		config["n_cores"]
 	log:
-		"logs/bwa_map_paired/{sample}_paired.log"
+		"logs/bwa_map_paired/{run_id}/{sample}_paired.log"
 	shell:
 		"""
 		RG_GROUP="$(samtools view -H {input.reads} | grep '^@RG' | sed 's/\t/\\t/g')"
@@ -52,7 +52,7 @@ rule bwa_map_singleton_reads:
 	threads:
 		config["n_cores"]
 	log:
-		"logs/bwa_map_paired/{sample}_singleton.log"
+		"logs/bwa_map_paired/{run_id}/{sample}_singleton.log"
 	shell:
 		"""
 		RG_GROUP="$(samtools view -H {input.reads} | grep '^@RG' | sed 's/\t/\\t/g')"
@@ -64,8 +64,8 @@ rule bwa_map_singleton_reads:
 
 rule merge_alignments:
 	input:
-		paired_files = lambda wildcards: ["data/output/mapped_reads/{run_id}/{0}_paired.bam".format(stem) for stem in SAMPLE_FILES[wildcards.run_id][wildcards.sample]],
-		singleton_files = lambda wildcards: ["data/output/mapped_reads/{run_id}/{0}_singletons.bam".format(stem) for stem in SAMPLE_FILES[wildcards.run_id][wildcards.sample]]
+		paired_files = "data/output/mapped_reads/{run_id}/{sample}_paired.bam",
+		singleton_files = "data/output/mapped_reads/{run_id}/{sample}_singleton.bam"
 	output:
 		temp("data/output/merged_alignments/{run_id}/{sample}.bam")
 	shell:
