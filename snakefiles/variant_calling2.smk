@@ -6,13 +6,36 @@
 #genotypegvcfs
 #VariantFiltration
 
+# 0) merge alignments of the same sample across multiple runs
+# - from here onwards, run_id gets dropped from names (but should still be available in readgroup tags)
+def find_sample_alignments(sample, runid_lookup = RUN_ID_DICT):
+    runids = runid_lookup[sample]
+    filenames = []
+
+    for rid in runids:
+        filenames.append("data/output/final_alignment/{0}/{1}.bam".format(rid, sample))
+
+    return filenames
+
+rule merge_resequenced:
+	input: 
+		lambda wildcards: find_sample_alignments(wildcards.sample)
+	output:
+		"data/output/run_ids_merged/{sample}.bam"
+	shell:
+		"samtools cat {input} > {output}"
+
+# - Index merged bam file
+# <add code to index new files>
+
+
 # 1) call variants on each sample
 rule call_variants:
 	input:
-		sample = "data/output/final_alignment/{run_id}/{sample}.bam",
+		sample = "data/output/run_ids_merged/{sample}.bam",
 		ref = REF_GENOM
 	output:
-		protected("data/output/called/{run_id}/{sample}.g.vcf.gz")
+		protected("data/output/called/{sample}.g.vcf.gz")
 	shell:
 		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
 
@@ -20,19 +43,19 @@ rule call_variants:
 # <needs all samples as input>
 rule combine_gvcfs:
 	input:
-		gvcfs = "data/output/called/{run_id}/{sample}.g.vcf.gz", 
+		gvcfs = expand("data/output/called/{sample}.g.vcf.gz", sample=FINAL_SAMPLES),
 		ref = REF_GENOM
 	output:
-		"data/output/called/{run_id}/all.g.vcf"
+		"data/output/called/all.g.vcf"
 	shell:
 		"gatk CombineGVCFs -R {input.ref} --variant {input.gvcfs} -O {output}"
 
 # 3) call joint variants on all samples	
 rule joint_variant_calling:
 	input:
-		"data/output/called/{run_id}/all.g.vcf"
+		"data/output/called/all.g.vcf"
 	output:
-		"data/output/called/{run_id}/all.vcf"
+		"data/output/called/all.vcf"
 	shell:
 		"gatk GenotypeGVCFs -V {input} -O {output}"
 
@@ -40,9 +63,9 @@ rule joint_variant_calling:
 
 rule joint_variant_filtration:
 	input:
-		"data/output/called/{run_id}/all.vcf"
+		"data/output/called/all.vcf"
 	output:
-		"data/output/called/{run_id}/all.filtered.vcf"
+		"data/output/called/all.filtered.vcf"
 	shell: """ 
 		gatk VariantFiltration 
 		--filter expression "MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)""QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"

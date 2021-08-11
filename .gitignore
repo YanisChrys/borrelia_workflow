@@ -1,0 +1,6 @@
+# Internal/working files
+.snakemake/*
+
+# Input files:
+data/input/*
+data/metadata/SampleMetadata.csv
