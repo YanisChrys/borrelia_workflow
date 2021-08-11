@@ -2,14 +2,14 @@
 
 Can be install in a linux with miniconda3 installed by doing:
 
-`
+```
 conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
 conda install pysam
 
 conda env create -f envs/environ_2.yml -n borrelia
-`
+```
 
 Pipeline for mapping and calling Borrelia samples.
 
