@@ -1,12 +1,12 @@
 # Tick diet sequence assemblies: Overall workflow
 import csv
 import warnings
-import os
+import pysam
 
 ## SETUP:
-#configfile: "config.yml"
+configfile: "config.yaml"
 
-REF_GENOM = "data/ref_genome/GCF_000222835.1_ASM22283v1_genomic.fasta"
+REF_GENOM = "data/ref_genom/GCF_000222835.1_ASM22283v1_genomic.fasta"
 
 ## Samples to process
 # Find all sample files in data directory:
@@ -16,17 +16,22 @@ AVAILABLE_FILES = glob_wildcards("data/input/multi_refs/{run_id}/{sample}.bam")
 # Check qPCR results
 known_positives = []
 
-with open("data/metadata/SampleMetadata.csv", mode="r", encoding="utf-8-sig") as handle:
-    sample_file = csv.DictReader(handle)
-    
+with open("data/metadata/borrelia_metadata.csv", mode="r", encoding="utf-8-sig") as handle:
+	sample_file = csv.DictReader(handle)
 	
-    for line in sample_file:
-        if line["pcr result"].lower() == "pos":
-            known_positives.append(line["sample"])
+	for line in sample_file:
+		if line["pcr result"].lower() == "pos":
+			known_positives.append(line["sample"])
 			
-			#get number of mapped reads, remove newline and turn to integer
-			num_mapped=int(pysam.view("-c", "-F", "4", "data/input/multi_refs_positive/${run_id}/${sample_pos}.bam").strip())
+			# fetch run_id using the sample if it exists in the filesystem:
+			if line["sample"] in AVAILABLE_FILES.sample:
+				run_id_index=AVAILABLE_FILES.sample.index(line["sample"])
+				my_run_id=AVAILABLE_FILES.run_id[run_id_index]
 				
+				my_sample="data/input/multi_refs/" + my_run_id + "/" + line["sample"] + ".bam"
+				
+				#get number of mapped reads, remove newline and turn to integer
+				num_mapped=int(pysam.view("-c", "-F", "4", my_sample).strip())
 				# if there are too few mapped reads write the sample name to a file to mark it as a potential false positive
 				if num_mapped<=500:
 					with open('false_positive_borrelia.txt', 'a+') as my_false_positives:
