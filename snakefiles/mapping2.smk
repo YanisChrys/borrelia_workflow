@@ -95,7 +95,7 @@ rule samtools_index:
 	output:
 		temp("data/output/sorted_alignment/{run_id}/{sample}.bam.bai")
 	shell:
-		"samtools index {input}"
+		"picard BuildBamIndex I={input}"
 
 
 # Mark remaining duplicates
