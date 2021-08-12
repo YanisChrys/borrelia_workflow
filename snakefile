@@ -23,20 +23,20 @@ with open("data/metadata/borrelia_metadata.csv", mode="r", encoding="utf-8-sig")
 		if line["pcr result"].lower() == "pos":
 			known_positives.append(line["sample"])
 			
-			# fetch run_id using the sample if it exists in the filesystem:
-			if line["sample"] in AVAILABLE_FILES.sample:
-				run_id_index=AVAILABLE_FILES.sample.index(line["sample"])
-				my_run_id=AVAILABLE_FILES.run_id[run_id_index]
-				
-				my_sample="data/input/multi_refs/" + my_run_id + "/" + line["sample"] + ".bam"
-				
-				#get number of mapped reads, remove newline and turn to integer
-				num_mapped=int(pysam.view("-c", "-F", "4", my_sample).strip())
-				# if there are too few mapped reads write the sample name to a file to mark it as a potential false positive
-				if num_mapped<=500:
-					with open('false_positive_borrelia.txt', 'a+') as my_false_positives:
-						my_false_positives.write(line["sample"])
-				
+#			# fetch run_id using the sample if it exists in the filesystem:
+#			if line["sample"] in AVAILABLE_FILES.sample:
+#				run_id_index=AVAILABLE_FILES.sample.index(line["sample"])
+#				my_run_id=AVAILABLE_FILES.run_id[run_id_index]
+#				
+#				my_sample="data/input/multi_refs/" + my_run_id + "/" + line["sample"] + ".bam"
+#				
+#				#get number of mapped reads, remove newline and turn to integer
+#				num_mapped=int(pysam.view("-c", "-F", "4", my_sample).strip())
+#				# if there are too few mapped reads write the sample name to a file to mark it as a potential false positive
+#				if num_mapped<=500:
+#					with open('false_positive_borrelia.txt', 'a+') as my_false_positives:
+#						my_false_positives.write(line["sample"])
+			
 			
 
 
