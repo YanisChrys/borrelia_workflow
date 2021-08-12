@@ -10,7 +10,7 @@ rule extract_paired_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
-		"samtools fastq -ntf 13 {input} > {output}"
+		"samtools fastq -n -f 13 {input} > {output}"
 
 
 rule extract_singleton_reads_from_bam:
@@ -21,24 +21,28 @@ rule extract_singleton_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
 	shell:
-		"samtools fastq -ntf 4 {input} > {output}"	
+		"samtools fastq -n -f 4 {input} > {output}"	
+
+
 
 
 # 2) map paired and unpaired reads separately
 rule bwa_map_paired_reads:
 	input:
 		ref = REF_GENOM,
-		reads = "data/input/reads/{run_id}/{sample}_paired.fastq"
+		reads = "data/input/reads/{run_id}/{sample}_paired.fastq",
+		rg_source = "data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
 		"data/output/mapped_reads/{run_id}/{sample}_paired.bam"
 	threads:
 		config["n_cores"]
+	params:
+		rg_group="'@RG\\tSM:{sample}\\tID:{run_id}_{sample}\\tPL:Illumina'"
 	log:
 		"logs/bwa_map_paired/{run_id}/{sample}_paired.log"
 	shell:
 		"""
-		RG_GROUP="$(samtools view -H {input.reads} | grep '^@RG' | sed 's/\t/\\t/g')"
-		(bwa mem -M -R $RG_GROUP -t {threads} {input.ref} {input.reads} | samtools view -Sb - > {output})
+		(bwa mem -M -R {params.rg_group} -t {threads} {input.ref} {input.reads} | samtools view -Sb - > {output})
 		&> {log}
 		"""
 
@@ -46,17 +50,19 @@ rule bwa_map_paired_reads:
 rule bwa_map_singleton_reads:
 	input:
 		ref = REF_GENOM,
-		reads = "data/input/reads/{run_id}/{sample}_singleton.fastq"
+		reads = "data/input/reads/{run_id}/{sample}_singleton.fastq",
+		rg_source = "data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
 		"data/output/mapped_reads/{run_id}/{sample}_singleton.bam"
 	threads:
 		config["n_cores"]
 	log:
 		"logs/bwa_map_paired/{run_id}/{sample}_singleton.log"
+	params:
+		rg_group="'@RG\\tSM:{sample}\\tID:{run_id}_{sample}\\tPL:Illumina'"
 	shell:
 		"""
-		RG_GROUP="$(samtools view -H {input.reads} | grep '^@RG' | sed 's/\t/\\t/g')"
-		(bwa mem -M -R $RG_GROUP -t {threads} {input.ref} {input.reads} | samtools view -Sb - > {output})
+		(bwa mem -M -R {params.rg_group} -t {threads} {input.ref} {input.reads} | samtools view -Sb - > {output})
 		&> {log}
 		"""
 
