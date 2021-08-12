@@ -86,7 +86,7 @@ rule samtools_sort:
 	output:
 		temp("data/output/sorted_alignment/{run_id}/{sample}.bam")
 	shell:
-		"picard SortSam INPUT={input} OUTPUT={output} SORT_ORDER=coordinate "
+		"picard SortSam -INPUT {input} -OUTPUT {output} -SORT_ORDER coordinate "
 
 # Index alignments
 rule samtools_index:
@@ -95,7 +95,7 @@ rule samtools_index:
 	output:
 		temp("data/output/sorted_alignment/{run_id}/{sample}.bam.bai")
 	shell:
-		"picard BuildBamIndex I={input}"
+		"picard BuildBamIndex -I {input} -O {output}"
 
 
 # Mark remaining duplicates

@@ -34,7 +34,7 @@ rule samtools_index_merged:
 	output:
 		protected("data/output/run_ids_merged/{sample}.bam.bai")
 	shell:
-		"samtools index {input}"
+		"picard BuildBamIndex -I {input} -O {output}"
 
 
 # 1) call variants on each sample
