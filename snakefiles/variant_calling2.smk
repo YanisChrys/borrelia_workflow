@@ -23,17 +23,16 @@ rule merge_resequenced:
 	input: 
 		lambda wildcards: find_sample_alignments(wildcards.sample)
 	output:
-		"data/output/run_ids_merged/{sample}.bam"
+		protected("data/output/run_ids_merged/{sample}.bam")
 	shell:
 		"samtools cat {input} > {output}"
 
-# - Index merged bam file
-# re-index the files
+# - Re-index merged bam files
 rule samtools_index_merged:
 	input:
 		"data/output/run_ids_merged/{sample}.bam"
 	output:
-		"data/output/run_ids_merged/{sample}.bam.bai"
+		protected("data/output/run_ids_merged/{sample}.bam.bai")
 	shell:
 		"samtools index {input}"
 
@@ -45,6 +44,8 @@ rule call_variants:
 		ref = REF_GENOM
 	output:
 		protected("data/output/called/{sample}.g.vcf.gz")
+	benchmark:
+		"benchmarks/{sample}.bwa.benchmark.txt"
 	shell:
 		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
 
@@ -74,7 +75,7 @@ rule joint_variant_filtration:
 	input:
 		"data/output/called/all.vcf"
 	output:
-		"data/output/called/all.filtered.vcf"
+		protected("data/output/called/all.filtered.vcf")
 	shell: """ 
 		gatk VariantFiltration 
 		--filter expression "MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)""QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"
