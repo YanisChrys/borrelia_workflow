@@ -5,7 +5,7 @@ n_cores: 2
 
 # Location of sample metadata:
 #  - Must contain a column named 'sample' containing sample names
-metadata_file: data/metadata/SampleMetadata.csv
+metadata_file: data/metadata/borrelia_metadata.csv
 
 # Regular expression to match sample IDs in the filenames used for reads
 #   - Names of alignments, etc. will be simplified to to contain only the
