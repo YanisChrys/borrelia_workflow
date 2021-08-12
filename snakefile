@@ -35,7 +35,7 @@ with open("data/metadata/borrelia_metadata.csv", mode="r", encoding="utf-8-sig")
 				# if there are too few mapped reads write the sample name to a file to mark it as a potential false positive
 				if num_mapped<=500:
 					with open('false_positive_borrelia.txt', 'a+') as my_false_positives:
-						my_false_positives.write(line[sample])
+						my_false_positives.write(line["sample"])
 				
 			
 
