@@ -41,11 +41,14 @@ rule samtools_index_merged:
 rule call_variants:
 	input:
 		sample = "data/output/run_ids_merged/{sample}.bam",
+		index = "data/output/run_ids_merged/{sample}.bam.bai",
 		ref = REF_GENOM
 	output:
 		protected("data/output/called/{sample}.g.vcf.gz")
 	benchmark:
-		"benchmarks/{sample}.bwa.benchmark.txt"
+		"benchmarks/{sample}.HapCaller.benchmark.txt"
+	threads:
+		config["n_cores"]
 	shell:
 		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
 
@@ -57,30 +60,45 @@ rule combine_gvcfs:
 		ref = REF_GENOM
 	output:
 		"data/output/called/all.g.vcf"
+	benchmark:
+		"benchmarks/combinegvcfs.benchmark.txt"
+	threads:
+		config["n_cores"]
 	shell:
-		"gatk CombineGVCFs -R {input.ref} --variant {input.gvcfs} -O {output}"
+		"gatk CombineGVCFs -R {input.ref} $(echo {input.gvcfs} | sed 's/data/ -V data/g') -O {output}"
 
 # 3) call joint variants on all samples	
 rule joint_variant_calling:
 	input:
-		"data/output/called/all.g.vcf"
+		ref = REF_GENOM,
+		gvcfs = "data/output/called/all.g.vcf"
 	output:
 		"data/output/called/all.vcf"
+	benchmark:
+		"benchmarks/genotypegvcfs.benchmark.txt"
+	threads:
+		config["n_cores"]
 	shell:
-		"gatk GenotypeGVCFs -V {input} -O {output}"
+		"gatk GenotypeGVCFs -R {input.ref} -V {input.gvcfs} -O {output}"
 
 #4) filter variants
 
 rule joint_variant_filtration:
 	input:
-		"data/output/called/all.vcf"
+		ref = REF_GENOM,
+		allvcf = "data/output/called/all.vcf"
 	output:
 		protected("data/output/called/all.filtered.vcf")
-	shell: """ 
-		gatk VariantFiltration 
-		--filter expression "MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)""QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"
-		-R genome.fa -V all.vcf -O all.filtered.vcf
-	"""
+	threads:
+		config["n_cores"]
+	shell: """
+		gatk VariantFiltration \
+		-R {input.ref} \
+		-V {input.allvcf} \
+		-O {output} \
+		--filter-name "my_filters" \
+		--filter-expression "QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"
+		"""
 
 
 
