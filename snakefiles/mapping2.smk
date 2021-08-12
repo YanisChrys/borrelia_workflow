@@ -28,7 +28,7 @@ rule extract_singleton_reads_from_bam:
 rule bwa_map_paired_reads:
 	input:
 		ref = REF_GENOM,
-		reads = "data/input/reads/{run_id}/{sample}_paired.fastq",
+		reads = "data/input/reads/{run_id}/{sample}_paired.fastq"
 	output:
 		"data/output/mapped_reads/{run_id}/{sample}_paired.bam"
 	threads:
@@ -46,7 +46,7 @@ rule bwa_map_paired_reads:
 rule bwa_map_singleton_reads:
 	input:
 		ref = REF_GENOM,
-		reads = "data/input/reads/{run_id}/{sample}_singleton.fastq",
+		reads = "data/input/reads/{run_id}/{sample}_singleton.fastq"
 	output:
 		"data/output/mapped_reads/{run_id}/{sample}_singleton.bam"
 	threads:
