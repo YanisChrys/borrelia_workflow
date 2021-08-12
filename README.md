@@ -11,6 +11,12 @@ conda install pysam
 conda env create -f envs/environ_2.yml -n borrelia
 ```
 
+And then activate the environment containing the appropriate programs with:
+
+```
+conda activate borrelia
+```
+
 Pipeline for mapping and calling Borrelia samples.
 
 The reference genome needs to be unzipped, indexed and placed inside "data/ref_genom/"
