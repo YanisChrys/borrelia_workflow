@@ -28,7 +28,7 @@ rule merge_resequenced:
 		"samtools cat {input} > {output}"
 
 # - Re-index merged bam files
-rule samtools_index_merged:
+rule index_merged:
 	input:
 		"data/output/run_ids_merged/{sample}.bam"
 	output:
@@ -99,6 +99,54 @@ rule joint_variant_filtration:
 		--filter-name "my_filters" \
 		--filter-expression "QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"
 		"""
+
+
+#5 Extract each sample from the vcf
+rule extract_samples:
+	input:
+		ref = REF_GENOM,
+		my_sample="data/output/called/{sample}.g.vcf.gz",
+		allvcf="data/output/called/all.filtered.vcf"
+	output:
+		"data/output/consensus/{sample}.vcf"
+	threads:
+		config["n_cores"]
+	shell: """
+		gatk SelectVariants \
+		-R {input.ref} \
+		-V {input.allvcf} \
+		-O {output} \
+		--sample-name {wildcards.sample}
+	"""
+		
+# 6) create fasta consensus genome for each sample for each plasmid and the chromosome
+rule create_fasta:
+	input:
+		ref = REF_GENOM,
+		my_sample="data/output/consensus/{sample}.vcf"
+	output:
+		"data/output/consensus/fasta/{sample}.fasta"
+	threads:
+		config["n_cores"]
+	shell: """
+		gatk FastaAlternateReferenceMaker \
+		-R {input.ref} \
+		-V {input.my_sample} \
+		-O {output}
+	"""
+	
+# 7) index fasta
+rule index_fasta:
+	input:
+		"data/output/consensus/fasta/{sample}.fasta"
+	output:
+		"data/output/consensus/fasta/{sample}.fasta.fai"
+	shell:
+		"samtools faidx {input} -o {output}"
+
+	
+
+
 
 
 

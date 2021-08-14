@@ -2,6 +2,29 @@
 # 1) extract paired and singleton reads from bam files.
 # Each read is uniquely mapped to a reference, so we extract them all before remapping them.
 # -t: copy RG, BC and QT tags to the FASTQ header line
+#rule extract_paired_reads_from_bam:
+#	input: 
+#		"data/input/multi_refs/{run_id}/{sample}.bam"
+#	output:
+#		"data/input/reads/{run_id}/{sample}_paired.fastq"
+#	log:
+#		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
+#	shell:
+#		"samtools fastq -n -f 13 {input} > {output}"
+
+
+#rule extract_singleton_reads_from_bam:
+#	input: 
+#		"data/input/multi_refs/{run_id}/{sample}.bam"
+#	output:
+#		"data/input/reads/{run_id}/{sample}_singleton.fastq"
+#	log:
+#		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
+#	shell:
+#		"samtools fastq -n -f 4 {input} > {output}"	
+
+
+# 1.a) extract paired reads (0x1)
 rule extract_paired_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
@@ -10,18 +33,24 @@ rule extract_paired_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
-		"samtools fastq -n -f 13 {input} > {output}"
+		"samtools fastq -n -f 1 {input} > {output}"
 
-
+# 1.b ) exatract unpaired reads (0x4: read unpaired, 0x8: mate unpaired)
 rule extract_singleton_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
-		"data/input/reads/{run_id}/{sample}_singleton.fastq"
+		F4="data/input/reads/{run_id}/{sample}_singleton_pair.fastq",
+		F8="data/input/reads/{run_id}/{sample}_singleton_mate.fastq",
+		all_single="data/input/reads/{run_id}/{sample}_singleton.fastq"
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
-	shell:
-		"samtools fastq -n -f 4 {input} > {output}"	
+	run:
+		shell("samtools fastq -n -f 4 {input} > {output.F4}")
+		shell("samtools fastq -n -f 8 {input} > {output.F8}")
+		shell("cat {output.F4} {output.F8} > {output.all_single}")
+
+
 
 
 
@@ -73,48 +102,59 @@ rule merge_alignments:
 		paired_files = "data/output/mapped_reads/{run_id}/{sample}_paired.bam",
 		singleton_files = "data/output/mapped_reads/{run_id}/{sample}_singleton.bam"
 	output:
-		temp("data/output/merged_alignments/{run_id}/{sample}.bam")
+		"data/output/merged_alignments/{run_id}/{sample}.bam"
 	shell:
 		"samtools cat {input.paired_files} {input.singleton_files} > {output}"
-		
-		
-# Alignment post processing steps
-# 4) Sort alignments
-rule samtools_sort:
-	input:
+
+# 4) extract mapped reads
+
+rule extract_mapped_reads:
+	input: 
 		"data/output/merged_alignments/{run_id}/{sample}.bam"
 	output:
-		temp("data/output/sorted_alignment/{run_id}/{sample}.bam")
+		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
+	log:
+		"logs/{run_id}/extract_mapped_reads_from_bam_{sample}.log"
 	shell:
-		"picard SortSam -INPUT {input} -OUTPUT {output} -SORT_ORDER coordinate "
+		"samtools view -b -F 4 {input} > {output}"
+		
+# Alignment post processing steps
+# 5) Sort alignments
+rule samtools_sort:
+	input:
+		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
+	output:
+		"data/output/sorted_alignment/{run_id}/{sample}.bam"
+	shell:
+		"picard SortSam I={input} O={output} SORT_ORDER=coordinate "
 
-# Index alignments
+# 6) Index alignments
 rule samtools_index:
 	input:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	output:
-		temp("data/output/sorted_alignment/{run_id}/{sample}.bam.bai")
+		"data/output/sorted_alignment/{run_id}/{sample}.bam.bai"
 	shell:
 		"picard BuildBamIndex -I {input} -O {output}"
 
 
-# Mark remaining duplicates
+# 7) Mark remaining duplicates
 rule mark_duplicates:
 	input:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	output:
-		bam = temp("data/output/duplicates_marked/{run_id}/{sample}.bam"),
+		bam = "data/output/duplicates_marked/{run_id}/{sample}.bam",
 		metrics = protected("data/output/duplicates_marked/{run_id}/{sample}.dup_metrics.txt")
 	log:
 		"logs/mark_duplicates/duplicates_{run_id}_{sample}.log"
 	threads:
 		config["n_cores"]
 	shell:
-		"picard -XX:ParallelGCThreads={threads} -Xmx5g MarkDuplicates I={input} O={output.bam} M={output.metrics} "
+		"picard -XX:ParallelGCThreads={threads} -Xmx5g MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} "
 		"&> {log}"
 
 
-# Re-index final alignment and move to final output location:
+# 9) Re-index final alignment and move to final output location:
 #  - Also see definition of FINAL_ALIGNMENTS constant in setup.smk, which makes this a terminal node
 rule finalise_aligment:
 	input:
