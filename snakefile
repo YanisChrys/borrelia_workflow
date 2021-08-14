@@ -16,7 +16,7 @@ AVAILABLE_FILES = glob_wildcards("data/input/multi_refs/{run_id}/{sample}.bam")
 # Check qPCR results
 known_positives = []
 
-with open("data/metadata/borrelia_metadata.csv", mode="r", encoding="utf-8-sig") as handle:
+with open("data/metadata/borrelia_metadata2.csv", mode="r", encoding="utf-8-sig") as handle:
 	sample_file = csv.DictReader(handle)
 	
 	for line in sample_file:
@@ -72,5 +72,7 @@ include: "snakefiles/variant_calling2.smk"
 
 
 # Terminal node:
+#"data/output/called/all.filtered.vcf"
 rule all: 
-    input: "data/output/called/all.filtered.vcf"
+    input: expand("data/output/consensus/fasta/{sample}.fasta.fai", sample=FINAL_SAMPLES)
+	
