@@ -96,8 +96,20 @@ rule joint_variant_filtration:
 		-R {input.ref} \
 		-V {input.allvcf} \
 		-O {output} \
-		--filter-name "my_filters" \
-		--filter-expression "QD < 2.0 || DP < 40 || FS > 60.0 || MQ < 40.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\"
+		--filter-expression "QD < 2.0" \
+		--filter-name "QD2" \
+		--filter-expression "DP < 5" \
+		--filter-name "DP5" \
+		--filter-expression "FS > 60.0" \
+		--filter-name "FS60" \
+		--filter-expression "MQ < 40.0" \
+		--filter-name "MQ40" \
+		--filter-expression "MappingQualityRankSum < -12.5" \
+		--filter-name "MQRS12.5" \
+		--filter-expression "ReadPosRankSum < -8.0" \
+		--filter-name "RPRS8" \
+		--filter-expression "QUAL < 30.0" \
+		--filter-name "QUAL30"
 		"""
 
 
@@ -145,12 +157,5 @@ rule index_fasta:
 		"samtools faidx {input} -o {output}"
 
 	
-
-
-
-
-
-
-
 
 
