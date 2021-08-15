@@ -1,11 +1,11 @@
 # Random seed:
 random_seed: 23102020
 
-n_cores: 2
+n_cores: 4
 
 # Location of sample metadata:
 #  - Must contain a column named 'sample' containing sample names
-metadata_file: data/metadata/borrelia_metadata.csv
+metadata_file: data/metadata/borrelia_metadata2.csv
 
 # Regular expression to match sample IDs in the filenames used for reads
 #   - Names of alignments, etc. will be simplified to to contain only the
