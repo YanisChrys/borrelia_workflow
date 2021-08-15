@@ -35,7 +35,7 @@ rule extract_paired_reads_from_bam:
 	shell:
 		"samtools fastq -n -f 1 {input} > {output}"
 
-# 1.b ) exatract unpaired reads (0x4: read unpaired, 0x8: mate unpaired)
+# 1.b ) extract unpaired reads (0x4: read unpaired, 0x8: mate unpaired)
 rule extract_singleton_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
