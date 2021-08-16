@@ -68,11 +68,13 @@ for i in range(len(AVAILABLE_FILES.run_id)):
 ## Sub-workflows (partially independent branches):
 include: "snakefiles/mapping2.smk"
 include: "snakefiles/variant_calling2.smk"
+include: "snakefiles/filtering.smk"
+include: "snakefiles/create_fasta.smk"
 
 
 
 # Terminal node:
 #"data/output/called/all.filtered.vcf"
 rule all: 
-    input: expand("data/output/consensus/fasta/{sample}.fasta.fai", sample=FINAL_SAMPLES)
+    input: expand("data/output/called/fasta/{sample}.snp.indel.ref.fasta", sample=FINAL_SAMPLES)
 	
