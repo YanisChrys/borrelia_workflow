@@ -29,12 +29,16 @@ rule create_snp_fasta:
 		config["n_cores"]
 	log:
 		"logs/called/filtered/create_snp_{sample}.fasta.log"
-	shell: """
-		gatk FastaAlternateReferenceMaker \
+	run:
+		shell("""gatk FastaAlternateReferenceMaker \
 		-R {input.ref} \
 		-V {input.my_sample} \
 		-O {output}
-	"""
+		""")
+		# remove ">1" from chromosome name - which is added by gatk -to keep real name
+		# and replace ":" with space so the chromosome name is recognised
+		shell("printf '%s\n' '%s/>[0-9]./>/g' 'x' | ex {output}")
+		shell("printf '%s\n' '%s/:/ /g' 'x' | ex {output}")
 	
 # 7) index fasta
 rule index_fasta:
@@ -52,7 +56,7 @@ rule create_dict_for_fasta:
 	output:
 		"data/output/called/fasta/{sample}.snp.ref.dict"
 	shell:
-		"picard CreateSequenceDictionary R={input} O={output}"
+		"picard CreateSequenceDictionary -R {input} -O {output}"
 
 #9) use new reference with indel file:
 rule extract_samples_indels:
