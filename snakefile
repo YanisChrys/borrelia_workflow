@@ -75,6 +75,9 @@ include: "snakefiles/create_fasta.smk"
 
 # Terminal node:
 #"data/output/called/all.filtered.vcf"
-rule all: 
-    input: expand("data/output/called/newref/{sample}.snp.indel.ref.fasta", sample=FINAL_SAMPLES)
+rule all:
+	input:
+		expand("data/output/called/snp_indel_ref/{sample}.snp.ref.fasta.fai", sample=FINAL_SAMPLES),
+		expand("data/output/called/snp_indel_ref/{sample}.snp.ref.dict", sample=FINAL_SAMPLES)
+	
 	
