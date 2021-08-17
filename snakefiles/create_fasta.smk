@@ -112,7 +112,33 @@ rule create_indel_fasta:
 		-V {input.my_sample} \
 		-O {output}
 	"""
-	
-	
 
+# 11) move second reference
+rule move_snpindel_ref:
+	input:
+		"data/output/called/newref/{sample}.snp.indel.ref.fasta"
+	output:
+		protected("data/output/called/snp_indel_ref/{sample}.snp.ref.fasta")
+	run:
+		os.renames(input[0], output[0])
+	
+# 7) index 2nd fasta
+rule index_2nd_fasta:
+	input:
+		my_fasta="data/output/called/snp_indel_ref/{sample}.snp.ref.fasta"
+	output:
+		"data/output/called/snp_indel_ref/{sample}.snp.ref.fasta.fai"
+	shell: """
+	samtools faidx {input.my_fasta} -o {output}
+	"""
+
+# 8) create dictionary for 2nd fasta
+rule create_dict_for_2nd_fasta:
+	input:
+		my_fasta="data/output/called/snp_indel_ref/{sample}.snp.ref.fasta"
+	output:
+		"data/output/called/snp_indel_ref/{sample}.snp.ref.dict"
+	shell: """
+		picard CreateSequenceDictionary -R {input.my_fasta} -O {output}
+	"""
 	
