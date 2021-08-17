@@ -62,7 +62,7 @@ rule index_fasta:
 	output:
 		"data/output/called/newref/{sample}.snp.ref.fasta.fai"
 	shell: """
-	samtools faidx {input.my_fasta} -o {output}
+		samtools faidx {input.my_fasta} -o {output}
 	"""
 
 # 8) create dictionary for fasta
@@ -110,7 +110,9 @@ rule create_indel_fasta:
 		gatk FastaAlternateReferenceMaker \
 		-R {input.ref} \
 		-V {input.my_sample} \
-		-O {output}
+		-O {output}  &&		
+		printf '%s\n' '%s/>[0-9]./>/g' 'x' | ex {output}  &&
+		printf '%s\n' '%s/:/ /g' 'x' | ex {output}
 	"""
 
 # 11) move second reference
@@ -129,7 +131,7 @@ rule index_2nd_fasta:
 	output:
 		"data/output/called/snp_indel_ref/{sample}.snp.indel.ref.fasta.fai"
 	shell: """
-	samtools faidx {input.my_fasta} -o {output}
+		samtools faidx {input.my_fasta} -o {output}
 	"""
 
 # 8) create dictionary for 2nd fasta
