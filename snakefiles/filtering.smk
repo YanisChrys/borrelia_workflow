@@ -1,9 +1,9 @@
 
 rule extract_SNPS:
 	input:
-		allvcf="data/output/called/all.vcf"
+		allvcf="data/output/called/allsites.vcf"
 	output:
-		"data/output/called/all.snp.vcf"
+		"data/output/called/allsites.snp.vcf"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -16,9 +16,9 @@ rule extract_SNPS:
 	
 rule extract_INDELS:
 	input:
-		allvcf="data/output/called/all.vcf"
+		allvcf="data/output/called/allsites.vcf"
 	output:
-		"data/output/called/all.indel.vcf"
+		"data/output/called/allsites.indel.vcf"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -33,9 +33,9 @@ rule extract_INDELS:
 rule SNP_filtration:
 	input:
 		ref = REF_GENOM,
-		allvcf = "data/output/called/all.snp.vcf"
+		allvcf = "data/output/called/allsites.snp.vcf"
 	output:
-		protected("data/output/called/filtered/all.filtered.snps.vcf")
+		protected("data/output/called/filtered/allsites.filtered.snps.vcf")
 	threads:
 		config["n_cores"]
 	shell: """
@@ -65,9 +65,9 @@ rule SNP_filtration:
 rule indel_filtration:
 	input:
 		ref = REF_GENOM,
-		allvcf = "data/output/called/all.indel.vcf"
+		allvcf = "data/output/called/allsites.indel.vcf"
 	output:
-		protected("data/output/called/filtered/all.filtered.indels.vcf")
+		protected("data/output/called/filtered/allsites.filtered.indels.vcf")
 	threads:
 		config["n_cores"]
 	shell: """
@@ -84,5 +84,6 @@ rule indel_filtration:
 		--filter-expression "QUAL < 30.0" \
 		--filter-name "QUAL30"
 		"""
+
 
 

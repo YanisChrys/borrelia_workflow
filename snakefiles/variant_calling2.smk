@@ -44,7 +44,7 @@ rule call_variants:
 		index = "data/output/run_ids_merged/{sample}.bam.bai",
 		ref = REF_GENOM
 	output:
-		protected("data/output/called/{sample}.g.vcf.gz")
+		"data/output/called/{sample}.g.vcf.gz"
 	benchmark:
 		"benchmarks/{sample}.HapCaller.benchmark.txt"
 	threads:
@@ -67,18 +67,22 @@ rule combine_gvcfs:
 	shell:
 		"gatk CombineGVCFs -R {input.ref} $(echo {input.gvcfs} | sed 's/data/ -V data/g') -O {output}"
 
+
+#"gatk GenomicsDBImport  -R {input.ref} $(echo {input.gvcfs} | sed 's/data/ -V data/g') -O {output} --genomicsdb-workspace-path data/output/my_dbi_database"
+
+
 # 3) call joint variants on all samples	
 rule joint_variant_calling:
 	input:
 		ref = REF_GENOM,
 		gvcfs = "data/output/called/all.g.vcf"
 	output:
-		"data/output/called/all.vcf"
+		"data/output/called/allsites.vcf"
 	benchmark:
 		"benchmarks/genotypegvcfs.benchmark.txt"
 	threads:
 		config["n_cores"]
 	shell:
-		"gatk GenotypeGVCFs -R {input.ref} -V {input.gvcfs} -O {output}"
+		"gatk GenotypeGVCFs -R {input.ref} -V {input.gvcfs} -O {output} -all-sites"
 
 

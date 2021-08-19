@@ -1,30 +1,4 @@
-
-# 1) extract paired and singleton reads from bam files.
-# Each read is uniquely mapped to a reference, so we extract them all before remapping them.
-# -t: copy RG, BC and QT tags to the FASTQ header line
-#rule extract_paired_reads_from_bam:
-#	input: 
-#		"data/input/multi_refs/{run_id}/{sample}.bam"
-#	output:
-#		"data/input/reads/{run_id}/{sample}_paired.fastq"
-#	log:
-#		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
-#	shell:
-#		"samtools fastq -n -f 13 {input} > {output}"
-
-
-#rule extract_singleton_reads_from_bam:
-#	input: 
-#		"data/input/multi_refs/{run_id}/{sample}.bam"
-#	output:
-#		"data/input/reads/{run_id}/{sample}_singleton.fastq"
-#	log:
-#		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
-#	shell:
-#		"samtools fastq -n -f 4 {input} > {output}"	
-
-
-# 1.a) extract paired reads (0x1)
+# 1.a) extract paired (0x1) mapped (0x2) reads
 rule extract_paired_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
@@ -33,25 +7,19 @@ rule extract_paired_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
-		"samtools fastq -n -f 1 {input} > {output}"
+		"samtools fastq -n -f 3 {input} > {output}"
 
-# 1.b ) extract unpaired reads (0x4: read unpaired, 0x8: mate unpaired)
+
+# 1.b ) extract singletons by excluding paired read (0x1) and unmapped reads (0x4)
 rule extract_singleton_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
 	output:
-		F4="data/input/reads/{run_id}/{sample}_singleton_pair.fastq",
-		F8="data/input/reads/{run_id}/{sample}_singleton_mate.fastq",
-		all_single="data/input/reads/{run_id}/{sample}_singleton.fastq"
+		"data/input/reads/{run_id}/{sample}_singleton.fastq"
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
-	run:
-		shell("samtools fastq -n -f 4 {input} > {output.F4}")
-		shell("samtools fastq -n -f 8 {input} > {output.F8}")
-		shell("cat {output.F4} {output.F8} > {output.all_single}")
-
-
-
+	shell:
+		"samtools fastq -n -G 5 {input} > {output}"
 
 
 
@@ -102,21 +70,21 @@ rule merge_alignments:
 		paired_files = "data/output/mapped_reads/{run_id}/{sample}_paired.bam",
 		singleton_files = "data/output/mapped_reads/{run_id}/{sample}_singleton.bam"
 	output:
-		"data/output/merged_alignments/{run_id}/{sample}.bam"
+		temp("data/output/merged_alignments/{run_id}/{sample}.bam")
 	shell:
 		"samtools cat {input.paired_files} {input.singleton_files} > {output}"
 
-# 4) extract mapped reads
 
+# 4) extract mapped reads
 rule extract_mapped_reads:
 	input: 
 		"data/output/merged_alignments/{run_id}/{sample}.bam"
 	output:
-		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
+		temp("data/output/extracted_merged_alignments/{run_id}/{sample}.bam")
 	log:
 		"logs/{run_id}/extract_mapped_reads_from_bam_{sample}.log"
 	shell:
-		"samtools view -b -F 4 {input} > {output}"
+		"samtools view -b -F 2052 {input} > {output}"
 		
 # Alignment post processing steps
 # 5) Sort alignments
@@ -126,7 +94,7 @@ rule samtools_sort:
 	output:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	shell:
-		"picard SortSam I={input} O={output} SORT_ORDER=coordinate "
+		"picard SortSam -I {input} -O {output} -SORT_ORDER coordinate "
 
 # 6) Index alignments
 rule samtools_index:
@@ -150,7 +118,7 @@ rule mark_duplicates:
 	threads:
 		config["n_cores"]
 	shell:
-		"picard -XX:ParallelGCThreads={threads} -Xmx5g MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} "
+		"picard MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} "
 		"&> {log}"
 
 
