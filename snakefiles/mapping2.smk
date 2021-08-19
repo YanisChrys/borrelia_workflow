@@ -19,7 +19,7 @@ rule extract_singleton_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
 	shell:
-		"samtools fastq -n -G 5 {input} > {output}"
+		"samtools fastq -n -G 2053 {input} > {output}"
 
 
 
