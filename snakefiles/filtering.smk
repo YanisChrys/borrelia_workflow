@@ -62,7 +62,7 @@ rule SNP_filtration:
 
 #indels
 
-rule indel_filtration:
+rule INDEL_filtration:
 	input:
 		ref = REF_GENOM,
 		allvcf = "data/output/called/allsites.indel.vcf"

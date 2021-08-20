@@ -7,7 +7,7 @@ rule extract_paired_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
-		"samtools fastq -n -f 3 {input} > {output}"
+		"samtools fastq -n -f 1 -F 2308 {input} > {output}" 
 
 
 # 1.b ) extract singletons by excluding paired read (0x1) and unmapped reads (0x4)
@@ -19,7 +19,7 @@ rule extract_singleton_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
 	shell:
-		"samtools fastq -n -G 2053 {input} > {output}"
+		"samtools fastq -n -F 2309 {input} > {output}"
 
 
 
@@ -64,7 +64,6 @@ rule bwa_map_singleton_reads:
 		"""
 
 # 3) merge paired and unpaired mapped reads
-
 rule merge_alignments:
 	input:
 		paired_files = "data/output/mapped_reads/{run_id}/{sample}_paired.bam",
@@ -75,22 +74,12 @@ rule merge_alignments:
 		"samtools cat {input.paired_files} {input.singleton_files} > {output}"
 
 
-# 4) extract mapped reads
-rule extract_mapped_reads:
-	input: 
-		"data/output/merged_alignments/{run_id}/{sample}.bam"
-	output:
-		temp("data/output/extracted_merged_alignments/{run_id}/{sample}.bam")
-	log:
-		"logs/{run_id}/extract_mapped_reads_from_bam_{sample}.log"
-	shell:
-		"samtools view -b -F 2052 {input} > {output}"
 		
 # Alignment post processing steps
 # 5) Sort alignments
 rule samtools_sort:
 	input:
-		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
+		"data/output/merged_alignments/{run_id}/{sample}.bam"
 	output:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	shell:
