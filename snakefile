@@ -53,15 +53,15 @@ FINAL_SAMPLES = []
 RUN_ID_DICT = {}  # Format is {sample: [run_id, run_id]}
 
 for i in range(len(AVAILABLE_FILES.run_id)):
-    sample = AVAILABLE_FILES.sample[i]
-    run_id = AVAILABLE_FILES.run_id[i]
+	sample = AVAILABLE_FILES.sample[i]
+	run_id = AVAILABLE_FILES.run_id[i]
 
-    if sample in known_positives:
-        if sample not in FINAL_SAMPLES:
-            FINAL_SAMPLES.append(sample)
-            RUN_ID_DICT[sample] = [run_id]
-        else:
-            RUN_ID_DICT[sample].append(run_id)
+	if sample in known_positives:
+		if sample not in FINAL_SAMPLES:
+			FINAL_SAMPLES.append(sample)
+			RUN_ID_DICT[sample] = [run_id]
+		else:
+			RUN_ID_DICT[sample].append(run_id)
 
 
 
@@ -74,10 +74,12 @@ include: "snakefiles/create_fasta.smk"
 
 
 # Terminal node:
-#"data/output/called/all.filtered.vcf"
 rule all:
 	input:
-		expand("data/output/called/snp_indel_ref/{sample}.snp.indel.ref.fasta.fai", sample=FINAL_SAMPLES),
-		expand("data/output/called/snp_indel_ref/{sample}.snp.indel.ref.dict", sample=FINAL_SAMPLES)
+		expand("data/output/called/newref/{sample}.newref.fasta.fai", sample=FINAL_SAMPLES),
+		expand("data/output/called/newref/{sample}.newref.dict", sample=FINAL_SAMPLES),
+		"data/output/called/filtered/allsites.filtered.indels.vcf", 
+		"data/output/called/filtered/allsites.filtered.snps.vcf"
+		
 	
 	
