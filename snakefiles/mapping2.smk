@@ -1,4 +1,10 @@
-# 1.a) extract paired (0x1) mapped (0x2) reads
+# 1.a) extract:
+# paired (0x1) and exclude:
+#read unmapped (0x4)
+#not primary alignment (0x100)
+#read fails platform/vendor quality checks (0x200)
+#read is PCR or optical duplicate (0x400)
+#supplementary alignment (0x800)
 rule extract_paired_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
@@ -7,10 +13,16 @@ rule extract_paired_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_paired.log"
 	shell:
-		"samtools fastq -n -f 1 -F 2308 {input} > {output}" 
+		"samtools fastq -n -f 1 -F 3844 {input} > {output}" 
 
 
-# 1.b ) extract singletons by excluding paired read (0x1) and unmapped reads (0x4)
+# 1.b ) extract singletons by excluding:
+#read paired (0x1)
+#read unmapped (0x4)
+#not primary alignment (0x100)
+#read fails platform/vendor quality checks (0x200)
+#read is PCR or optical duplicate (0x400)
+#supplementary alignment (0x800)
 rule extract_singleton_reads_from_bam:
 	input: 
 		"data/input/multi_refs/{run_id}/{sample}.bam"
@@ -19,7 +31,7 @@ rule extract_singleton_reads_from_bam:
 	log:
 		"logs/{run_id}/extract_reads_from_bam_{sample}_singleton.log"
 	shell:
-		"samtools fastq -n -F 2309 {input} > {output}"
+		"samtools fastq -n -F 3845 {input} > {output}"
 
 
 

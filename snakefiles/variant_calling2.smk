@@ -25,7 +25,7 @@ rule merge_resequenced:
 	output:
 		protected("data/output/run_ids_merged/{sample}.bam")
 	shell:
-		"samtools cat {input} > {output}"
+		"picard MergeSamFiles $(echo {input} | sed 's/data/ -I data/g') -O {output}"
 
 # - Re-index merged bam files
 rule index_merged:

@@ -1,12 +1,13 @@
-#1) Extract each samples called SNPs and indels to use with FastaAlternateReferenceMaker
+#1) Extract each samples called SNPs and Indels to use with FastaAlternateReferenceMaker
 # the good quality ones will be replaced in the reference
 # and the bad quality ones will be masked by the mask file containing all 
 # unwanted sites
+# the snp and indel based filtering has been done, now remove sites with AD<2
 rule extract_sample_snp_indels:
 	input:
 		ref=REF_GENOM,
 		my_sample="data/output/called/{sample}.g.vcf.gz",   #used for the sample name wildcard
-		allvcf="data/output/called/allsites.vcf"
+		allvcf="data/output/called/filtered/allsites.filtered.vcf"
 	output:
 		"data/output/called/vcf_extracted_SNP_INDELS/{sample}.variant.vcf"
 	threads:
@@ -19,9 +20,9 @@ rule extract_sample_snp_indels:
 		-V {input.allvcf} \
 		-O {output} \
 		--remove-unused-alternates \
+		--exclude-filtered \
 		--sample-name "{wildcards.sample}" \
-		-select-type SNP \
-		-select-type INDEL
+		-select 'vc.getGenotype("{wildcards.sample}").hasAD() && vc.isVariant() && (vc.getGenotype("{wildcards.sample}").getAD().1 > 2.0)'
 	"""
 
 
@@ -31,6 +32,7 @@ rule extract_sample_snp_indels:
 # all sites(SNP or Indel) not passing any one of our filters and 
 # low depth sites (AD of ALT-called site is less than 2 or DP of REF-called site is less than 2)
 # anything else will be a good quality, called site
+# also, get anything that isn't a SNP or an indel because they will be ignored by the tool and be entered as a reference or worse
 rule create_mask_files:
 	input:
 		ref=REF_GENOM,
@@ -49,7 +51,7 @@ rule create_mask_files:
 		-O {output} \
 		--remove-unused-alternates \
 		--sample-name "{wildcards.sample}" \
-		-select 'vc.getGenotype("{wildcards.sample}").isNoCall() || DP < 2.0 || (vc.getGenotype("{wildcards.sample}").getAD.0 < 2.0 && vc.getGenotype("{wildcards.sample}").isHomRef() ) || (vc.getGenotype("{wildcards.sample}").getAD.1 < 2.0 && vc.getGenotype("{wildcards.sample}").isHomVar() ) || ((QD < 2.0 && vc.isSNP()) || (FS > 60.0 && vc.isSNP()) || (MQ < 40.0 && vc.isSNP()) || (SOR > 3.0 && vc.isSNP()) || (MQRankSum < -12.5 && vc.isSNP()) || (ReadPosRankSum < -8.0 && vc.isSNP()) || (QUAL < 30.0 && vc.isSNP()) ) || ((QD < 2.0  && vc.isIndel() ) || (FS > 200.0  && vc.isIndel() ) || (ReadPosRankSum < -20.0  && vc.isIndel()) || (QUAL < 30.0  && vc.isIndel()) )'
+		-select 'vc.getGenotype("{wildcards.sample}").isNoCall() || DP < 2.0 || vc.isMixed() || (vc.getGenotype("{wildcards.sample}").isCalled() && !vc.isVariant() && vc.getGenotype("{wildcards.sample}").hasAD() && vc.getGenotype("{wildcards.sample}").getAD().0 < 2.0 ) || (vc.getGenotype("{wildcards.sample}").isHomVar() && vc.getGenotype("{wildcards.sample}").getAD().1 < 2.0 ) || ( vc.isSNP() && ( (QD < 2.0 ) || (FS > 60.0 ) || (MQ < 40.0 ) || (SOR > 3.0 ) || (MQRankSum < -12.5 ) || (ReadPosRankSum < -8.0 ) || (QUAL < 30.0 ) )) || ( vc.isIndel() && ( (QD < 2.0 ) || (FS > 200.0 ) || (ReadPosRankSum < -20.0 ) || (QUAL < 30.0 ) ))'
 	"""
 
 # 3) Edit mask files

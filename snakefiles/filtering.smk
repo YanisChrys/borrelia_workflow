@@ -12,8 +12,8 @@ rule extract_SNPS:
 		-O {output} \
 		-select-type SNP
 	"""
-	
-	
+
+
 rule extract_INDELS:
 	input:
 		allvcf="data/output/called/allsites.vcf"
@@ -85,5 +85,14 @@ rule INDEL_filtration:
 		--filter-name "QUAL30"
 		"""
 
-
-
+rule merge_filtered_vcfs:
+    input:
+        filt_snp="data/output/called/filtered/allsites.filtered.snps.vcf",
+        filt_indel="data/output/called/filtered/allsites.filtered.indels.vcf"
+    output:
+        "data/output/called/filtered/allsites.filtered.vcf"
+    threads:
+        config["n_cores"]
+    shell: """
+    picard MergeVcfs -I {input.filt_snp} -I {input.filt_indel} -O {output}
+    """
