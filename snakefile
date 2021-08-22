@@ -77,9 +77,7 @@ include: "snakefiles/create_fasta.smk"
 rule all:
 	input:
 		expand("data/output/called/newref/{sample}.newref.fasta.fai", sample=FINAL_SAMPLES),
-		expand("data/output/called/newref/{sample}.newref.dict", sample=FINAL_SAMPLES),
-		"data/output/called/filtered/allsites.filtered.indels.vcf", 
-		"data/output/called/filtered/allsites.filtered.snps.vcf"
+		expand("data/output/called/newref/{sample}.newref.dict", sample=FINAL_SAMPLES)
 		
 	
 	
