@@ -85,13 +85,27 @@ rule merge_alignments:
 	shell:
 		"samtools cat {input.paired_files} {input.singleton_files} > {output}"
 
+# 4) extract good mapped reads
+#exclude:
+#read unmapped (0x4)
+#not primary alignment (0x100)
+#read fails platform/vendor quality checks (0x200)
+#read is PCR or optical duplicate (0x400)
+#supplementary alignment (0x800)
+rule extract_only_mapped_reads:
+	input:
+		"data/output/merged_alignments/{run_id}/{sample}.bam"
+	output:
+		temp("data/output/extracted_merged_alignments/{run_id}/{sample}.bam")
+	shell:
+		"samtools view -b -F 3844 {input} > {output}"
 
 		
 # Alignment post processing steps
 # 5) Sort alignments
 rule samtools_sort:
 	input:
-		"data/output/merged_alignments/{run_id}/{sample}.bam"
+		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
 	output:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	shell:
@@ -119,7 +133,7 @@ rule mark_duplicates:
 	threads:
 		config["n_cores"]
 	shell:
-		"picard MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} "
+		"picard MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} --REMOVE_DUPLICATES T"
 		"&> {log}"
 
 

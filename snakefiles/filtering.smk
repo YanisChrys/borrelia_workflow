@@ -1,7 +1,7 @@
 
 rule extract_SNPS:
 	input:
-		allvcf="data/output/called/allsites.vcf"
+		allvcf="data/output/called/allsites.vcf.gz"
 	output:
 		"data/output/called/allsites.snp.vcf"
 	threads:
@@ -16,7 +16,7 @@ rule extract_SNPS:
 
 rule extract_INDELS:
 	input:
-		allvcf="data/output/called/allsites.vcf"
+		allvcf="data/output/called/allsites.vcf.gz"
 	output:
 		"data/output/called/allsites.indel.vcf"
 	threads:
@@ -35,7 +35,7 @@ rule SNP_filtration:
 		ref = REF_GENOM,
 		allvcf = "data/output/called/allsites.snp.vcf"
 	output:
-		protected("data/output/called/filtered/allsites.filtered.snps.vcf")
+		"data/output/called/filtered/allsites.filtered.snps.vcf"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -56,7 +56,9 @@ rule SNP_filtration:
 		--filter-expression "ReadPosRankSum < -8.0" \
 		--filter-name "RPRS8" \
 		--filter-expression "QUAL < 30.0" \
-		--filter-name "QUAL30"
+		--filter-name "QUAL30" \
+		--filter-expression "DP < 2.0 " \
+		--filter-name "DP2" 
 		"""
 
 
@@ -67,7 +69,7 @@ rule INDEL_filtration:
 		ref = REF_GENOM,
 		allvcf = "data/output/called/allsites.indel.vcf"
 	output:
-		protected("data/output/called/filtered/allsites.filtered.indels.vcf")
+		"data/output/called/filtered/allsites.filtered.indels.vcf"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -82,7 +84,9 @@ rule INDEL_filtration:
 		--filter-expression "ReadPosRankSum < -20.0" \
 		--filter-name "RPRS20" \
 		--filter-expression "QUAL < 30.0" \
-		--filter-name "QUAL30"
+		--filter-name "QUAL30" \
+		--filter-expression "DP < 2.0 " \
+		--filter-name "DP2" 
 		"""
 
 rule merge_filtered_vcfs:
