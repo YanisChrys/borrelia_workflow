@@ -103,7 +103,7 @@ rule extract_only_mapped_reads:
 		
 # Alignment post processing steps
 # 5) Sort alignments
-rule samtools_sort:
+rule sort:
 	input:
 		"data/output/extracted_merged_alignments/{run_id}/{sample}.bam"
 	output:
@@ -112,7 +112,7 @@ rule samtools_sort:
 		"picard SortSam -I {input} -O {output} -SORT_ORDER coordinate "
 
 # 6) Index alignments
-rule samtools_index:
+rule index:
 	input:
 		"data/output/sorted_alignment/{run_id}/{sample}.bam"
 	output:
