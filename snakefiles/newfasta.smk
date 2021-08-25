@@ -1,8 +1,9 @@
 
-# new referefence
+# new referefences where:
+# no filter based on DP (more invariants called)
+# and note deletions and insertions
 
 # new mask:
-
 rule create_lenient_mask_files:
 	input:
 		ref=REF_GENOM,

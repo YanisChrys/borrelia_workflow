@@ -40,7 +40,8 @@ rule get_chromosome_names:
 
 
 #Base recalibration:
-
+# use our own data to perform a sort of bootstrap recalibration
+# 3 times and correct for the different batch and sequencing technilogy biases in the quality/probability scores
 
 # call variants
 rule call_variants1:

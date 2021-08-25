@@ -24,6 +24,7 @@ rule call_variants:
 
 
 # 3) create db of samples
+#additional options resposible for performance
 rule genomicsdbimport:
 	input:
 		ref=REF_GENOM,

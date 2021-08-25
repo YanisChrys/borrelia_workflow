@@ -1,8 +1,5 @@
 #1) Extract each samples called SNPs and Indels
-# the good quality ones will be replaced in the reference
-# and the bad quality ones will be masked by the mask file containing all 
-# unwanted sites
-# remove filtered sites and 
+
 rule extract_sample_snp_indels:
 	input:
 		ref=REF_GENOM,
@@ -32,7 +29,7 @@ rule extract_sample_snp_indels:
 # all sites(SNP or Indel) not passing any one of our filters and 
 # low depth sites (AD of ALT-called site is less than 2 or DP of REF-called site is less than 2)
 # anything else will be a good quality, called site
-# also, get anything that isn't a SNP or an indel because they will be ignored by the tool and be entered as a reference or worse
+# also, remove mixed types, which are unlikely to be handled well. They will be ignored by the tool and be entered as a reference or worse
 rule create_mask_files:
 	input:
 		ref=REF_GENOM,
@@ -55,9 +52,7 @@ rule create_mask_files:
 	"""
 	
 # 3) Edit mask files
-# add "N" to all ALT positions in mask file to trick FastaAlternateReferenceMaker
-# into thinking they are variants and actually mask non-variant called or uncalled sites 
-# otherwise it will only mask unwanted variant sites
+# add n to mask (unnesecary) for bcftools and create bed file used by bcftools
 # NOTE: awk is for snakemake, not directly portable to terminal
 
 rule edit_mask_files:
@@ -95,7 +90,7 @@ rule create_dict_for_fasta:
 		picard CreateSequenceDictionary -R {input} -O {output}
 	"""
 
-
+# save all sites of a sample to check the fasta later
 rule vcf_to_check_fasta:
 	input:
 		ref=REF_GENOM,
@@ -114,7 +109,7 @@ rule vcf_to_check_fasta:
 		--sample-name "{wildcards.sample}" \
 	"""
 
-
+#  LEGACY CODE:
 
 # 4) Create fasta consensus genome for each sample (for each plasmid and the chromosome)
 # for SNPs and simple INDELS simulataneously:
