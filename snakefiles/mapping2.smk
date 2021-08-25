@@ -124,7 +124,8 @@ rule index:
 # 7) Mark remaining duplicates
 rule mark_duplicates:
 	input:
-		"data/output/sorted_alignment/{run_id}/{sample}.bam"
+		bam="data/output/sorted_alignment/{run_id}/{sample}.bam",
+		bai="data/output/sorted_alignment/{run_id}/{sample}.bam.bai"
 	output:
 		bam = "data/output/duplicates_marked/{run_id}/{sample}.bam",
 		metrics = protected("data/output/duplicates_marked/{run_id}/{sample}.dup_metrics.txt")
