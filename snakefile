@@ -67,6 +67,7 @@ for i in range(len(AVAILABLE_FILES.run_id)):
 
 ## Sub-workflows (partially independent branches):
 include: "snakefiles/mapping2.smk"
+
 include: "snakefiles/recalibration.smk"
 include: "snakefiles/variant_calling2.smk"
 include: "snakefiles/filtering.smk"
