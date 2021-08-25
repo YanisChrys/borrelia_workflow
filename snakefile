@@ -83,9 +83,9 @@ rule all:
 #		"data/output/my_dbi_database"
 #		"data/output/called/allsites.vcf.gz"
 		expand("data/output/called/vcf_allsites/{sample}.allsites.vcf", sample=FINAL_SAMPLES),
-		expand("data/output/called/fasta/{sample}.newref.dict", sample=FINAL_SAMPLES),
-		expand("data/output/called/leneintfasta/{sample}.lenient.dict", sample=FINAL_SAMPLES),
-		expand("data/output/called/leneintfasta/{sample}.lenient.fasta", sample=FINAL_SAMPLES)
+		expand("data/output/called/fasta_marked_indels/edited/{sample}.dict", sample=FINAL_SAMPLES),
+		expand("data/output/called/leneintfasta/{sample}.nomask.dict", sample=FINAL_SAMPLES),
+		expand("data/output/called/leneintfasta/{sample}.nomask.fasta", sample=FINAL_SAMPLES)
 		
 	
 	
