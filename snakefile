@@ -1,7 +1,7 @@
 # Tick diet sequence assemblies: Overall workflow
 import csv
 import warnings
-import pysam
+#import pysam
 
 ## SETUP:
 configfile: "config.yaml"
@@ -67,17 +67,25 @@ for i in range(len(AVAILABLE_FILES.run_id)):
 
 ## Sub-workflows (partially independent branches):
 include: "snakefiles/mapping2.smk"
+
+#include: "snakefiles/recalibration.smk"
 include: "snakefiles/variant_calling2.smk"
 include: "snakefiles/filtering.smk"
 include: "snakefiles/create_fasta.smk"
+include: "snakefiles/newfasta.smk"
 
 
 
 # Terminal node:
 rule all:
 	input:
-		expand("data/output/called/newref/{sample}.newref.fasta.fai", sample=FINAL_SAMPLES),
-		expand("data/output/called/newref/{sample}.newref.dict", sample=FINAL_SAMPLES)
+#		"data/output/called/allsites.vcf.gz"
+#		"data/output/my_dbi_database"
+#		"data/output/called/allsites.vcf.gz"
+		expand("data/output/called/vcf_allsites/{sample}.allsites.vcf", sample=FINAL_SAMPLES),
+		expand("data/output/called/fasta/{sample}.newref.dict", sample=FINAL_SAMPLES),
+		expand("data/output/called/leneintfasta/{sample}.lenient.dict", sample=FINAL_SAMPLES),
+		expand("data/output/called/leneintfasta/{sample}.lenient.fasta", sample=FINAL_SAMPLES)
 		
 	
 	
