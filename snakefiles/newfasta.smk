@@ -26,7 +26,7 @@ rule create_lenient_mask_files:
 	"""
 
 
-rule bed_lenientmask:
+rule edit_lenientmask:
 	input:
 		"data/output/called/leneintmasks/{sample}.lenientmask.vcf"
 	output:
@@ -40,21 +40,21 @@ rule bed_lenientmask:
 rule create_lenientfasta:
 	input:
 		ref=REF_GENOM,
-		mask="data/output/called/leneintmasks/{sample}.editedmask.bed",
+		#mask="data/output/called/leneintmasks/{sample}.editedmask.bed",
 		vcf="data/output/called/vcf_extracted_SNP_INDELS/{sample}.variant.vcf.gz"
 	output:
-		"data/output/called/leneintfasta/{sample}.lenient.fasta"
+		"data/output/called/leneintfasta/{sample}.nomask.fasta"
 	shell: """
-	bcftools consensus --mark-del "-" --mark-ins lc -s {wildcards.sample} -m {input.mask} -o {output} -f {input.ref} {input.vcf}
+	bcftools consensus --mark-del "*" --mark-ins lc -s {wildcards.sample} -o {output} -f {input.ref} {input.vcf}
 	"""
 
 
 # 7) create dictionary for fasta
 rule create_dict_for_lenientfasta:
 	input:
-		"data/output/called/leneintfasta/{sample}.lenient.fasta"
+		"data/output/called/leneintfasta/{sample}.nomask.fasta"
 	output:
-		"data/output/called/leneintfasta/{sample}.lenient.dict"
+		"data/output/called/leneintfasta/{sample}.nomask.dict"
 	shell: """
 		picard CreateSequenceDictionary -R {input} -O {output}
 	"""

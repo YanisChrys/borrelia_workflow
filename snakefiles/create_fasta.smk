@@ -75,17 +75,28 @@ rule create_fasta:
 		mask="data/output/called/editedmasks/{sample}.editedmask.bed",
 		vcf="data/output/called/vcf_extracted_SNP_INDELS/{sample}.variant.vcf.gz"
 	output:
-		"data/output/called/fasta/{sample}.newref.fasta"
-	shell:
-		"bcftools consensus -m {input.mask} -o {output} -f {input.ref} {input.vcf}"
+		"data/output/called/fasta_marked_indels/initial/{sample}.fasta"
+	shell: """
+	bcftools consensus --mark-del "*" --mark-ins lc -m {input.mask} -o {output} -f {input.ref} {input.vcf} 
+	"""
 
+# exclude all plasmids and write sample name to the chromosome name
+rule edit_fasta:
+	input:
+		"data/output/called/fasta_marked_indels/initial/{sample}.fasta"
+	output:
+		"data/output/called/fasta_marked_indels/edited/{sample}.fasta"
+	shell: """
+		samtools faidx {input} NC_017238.1 > {output}
+		sed -i "1s/.*/>NC_017238.1 {wildcards.sample}/"  {output}
+	"""
 
 # 7) create dictionary for fasta
 rule create_dict_for_fasta:
 	input:
-		"data/output/called/fasta/{sample}.newref.fasta"
+		"data/output/called/fasta_marked_indels/edited/{sample}.fasta"
 	output:
-		"data/output/called/fasta/{sample}.newref.dict"
+		"data/output/called/fasta_marked_indels/edited/{sample}.dict"
 	shell: """
 		picard CreateSequenceDictionary -R {input} -O {output}
 	"""
