@@ -35,4 +35,4 @@ The reference genome needs to be unzipped, indexed and placed inside "data/ref_g
 
 The mapping uses `bwa mem` and the variant calling uses `gatk HaplotypeCaller` in gVCF mode.
 
-Currently the code uses `GenomicsDBImport` to combine variants before jointly calling them which requires at least 100GB of free space to run.
+Currently the code uses `GenomicsDBImport` to combine variants before jointly calling them which requires at least 100GB of free diskspace to run.
