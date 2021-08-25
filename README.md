@@ -1,6 +1,6 @@
 # borrelia_workflow
 
-Can be install in a linux with miniconda3 installed by doing:
+Can be installed in a linux system with miniconda3 (https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html) and snakemake (https://snakemake.readthedocs.io/en/stable/getting_started/installation.html) by doing:
 
 ```
 conda config --add channels defaults
@@ -33,6 +33,6 @@ Pipeline for reference mapping and variant calling of _Borrelia_ samples. Two ty
 
 The reference genome needs to be unzipped, indexed and placed inside "data/ref_genom/"
 
-The mapping uses bwa mem and the variant calling uses HaplotypeCaller in gVCF mode.
+The mapping uses `bwa mem` and the variant calling uses `gatk HaplotypeCaller` in gVCF mode.
 
-Currently the code uses GenomicsDBImport to combine variants before jointly calling them which requires at least 100GB of free space to run.
+Currently the code uses `GenomicsDBImport` to combine variants before jointly calling them which requires at least 100GB of free space to run.
