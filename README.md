@@ -7,6 +7,7 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
 conda install bedops
+conda install blast
 
 conda env create -f envs/environ_2.yml -n borrelia
 ```
