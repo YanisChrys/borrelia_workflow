@@ -79,13 +79,12 @@ include: "snakefiles/newfasta.smk"
 # Terminal node:
 rule all:
 	input:
+		expand("data/output/called/vcf_allsites/{sample}.allsites.vcf", sample=FINAL_SAMPLES),
+		expand("data/output/called/stringent_fasta/edited/{sample}.fasta", sample=FINAL_SAMPLES),
+		expand("data/output/called/lenientfasta/edited/{sample}.lenient.dict", sample=FINAL_SAMPLES)
 #		"data/output/called/allsites.vcf.gz"
 #		"data/output/my_dbi_database"
 #		"data/output/called/allsites.vcf.gz"
-		expand("data/output/called/vcf_allsites/{sample}.allsites.vcf", sample=FINAL_SAMPLES),
-		expand("data/output/called/fasta_marked_indels/edited/{sample}.dict", sample=FINAL_SAMPLES),
-		expand("data/output/called/leneintfasta/{sample}.nomask.dict", sample=FINAL_SAMPLES),
-		expand("data/output/called/leneintfasta/{sample}.nomask.fasta", sample=FINAL_SAMPLES)
 		
 	
 	
