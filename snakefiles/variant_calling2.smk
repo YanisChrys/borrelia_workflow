@@ -17,7 +17,7 @@ rule call_variants:
 	threads:
 		config["n_cores"]
 	shell:
-		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
+		"gatk HaplotypeCaller --sample-ploidy 1 --disable-spanning-event-genotyping -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
 
 #"gatk GenotypeGVCFs -R {input.ref} -V {input.gvcfs} -O {output} -all-sites"
 

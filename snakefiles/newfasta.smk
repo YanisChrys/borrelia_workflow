@@ -10,11 +10,9 @@ rule create_lenient_mask_files:
 		my_sample="data/output/called/{sample}.g.vcf.gz",   #used for the sample name wildcard
 		allvcf="data/output/called/allsites.vcf.gz"
 	output:
-		"data/output/called/leneintmasks/{sample}.lenientmask.vcf"
+		"data/output/called/lenientmasks/{sample}.lenientmask.vcf"
 	threads:
 		config["n_cores"]
-	log:
-		"logs/called/snpmasks/extract_snps_{sample}.log"
 	shell: """
 		gatk SelectVariants \
 		-R {input.ref} \
@@ -28,9 +26,9 @@ rule create_lenient_mask_files:
 
 rule edit_lenientmask:
 	input:
-		"data/output/called/leneintmasks/{sample}.lenientmask.vcf"
+		"data/output/called/lenientmasks/{sample}.lenientmask.vcf"
 	output:
-		bed_mask="data/output/called/leneintmasks/{sample}.editedmask.bed"
+		bed_mask="data/output/called/lenientmasks/{sample}.editedmask.bed"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -40,21 +38,25 @@ rule edit_lenientmask:
 rule create_lenientfasta:
 	input:
 		ref=REF_GENOM,
-		#mask="data/output/called/leneintmasks/{sample}.editedmask.bed",
+		mask="data/output/called/lenientmasks/{sample}.editedmask.bed",
 		vcf="data/output/called/vcf_extracted_SNP_INDELS/{sample}.variant.vcf.gz"
 	output:
-		"data/output/called/leneintfasta/{sample}.nomask.fasta"
+		initial_fasta="data/output/called/lenientfasta/initial/{sample}.lenient.fasta",
+		edited_fasta="data/output/called/lenientfasta/edited/{sample}.lenient.fasta"
 	shell: """
-	bcftools consensus --mark-del "*" --mark-ins lc -s {wildcards.sample} -o {output} -f {input.ref} {input.vcf}
+	bcftools consensus -m {input.mask} -s {wildcards.sample} -o {output.initial_fasta} -f {input.ref} {input.vcf}
+	samtools faidx {output.initial_fasta} NC_017238.1 > {output.edited_fasta}
+	printf '%s\n' '%s/\*/-/g' 'x' | ex {output.edited_fasta}
+	sed -i "1s/.*/>NC_017238.1 {wildcards.sample}/"  {output.edited_fasta}
 	"""
 
 
 # 7) create dictionary for fasta
 rule create_dict_for_lenientfasta:
 	input:
-		"data/output/called/leneintfasta/{sample}.nomask.fasta"
+		"data/output/called/lenientfasta/edited/{sample}.lenient.fasta"
 	output:
-		"data/output/called/leneintfasta/{sample}.nomask.dict"
+		"data/output/called/lenientfasta/edited/{sample}.lenient.dict"
 	shell: """
 		picard CreateSequenceDictionary -R {input} -O {output}
 	"""

@@ -1,5 +1,4 @@
 #1) Extract each samples called SNPs and Indels
-
 rule extract_sample_snp_indels:
 	input:
 		ref=REF_GENOM,
@@ -24,19 +23,19 @@ rule extract_sample_snp_indels:
 
 
 
-# 2) create mask with: 
+# 2) create stringent version mask with: 
 # uncalled sites, 
+#mixed sites (not handled well - or at all which means they become false positive REF calls)
 # all sites(SNP or Indel) not passing any one of our filters and 
 # low depth sites (AD of ALT-called site is less than 2 or DP of REF-called site is less than 2)
 # anything else will be a good quality, called site
-# also, remove mixed types, which are unlikely to be handled well. They will be ignored by the tool and be entered as a reference or worse
 rule create_mask_files:
 	input:
 		ref=REF_GENOM,
 		my_sample="data/output/called/{sample}.g.vcf.gz",   #used for the sample name wildcard
 		allvcf="data/output/called/allsites.vcf.gz"
 	output:
-		"data/output/called/masks/{sample}.mask.vcf"
+		"data/output/called/stringent_masks/{sample}.mask.vcf"
 	threads:
 		config["n_cores"]
 	log:
@@ -57,10 +56,10 @@ rule create_mask_files:
 
 rule edit_mask_files:
 	input:
-		"data/output/called/masks/{sample}.mask.vcf"
+		"data/output/called/stringent_masks/{sample}.mask.vcf"
 	output:
-		vcf_mask="data/output/called/editedmasks/{sample}.editedmask.vcf",
-		bed_mask="data/output/called/editedmasks/{sample}.editedmask.bed"
+		vcf_mask="data/output/called/stringent_masks/editedmasks/{sample}.editedmask.vcf",
+		bed_mask="data/output/called/stringent_masks/editedmasks/{sample}.editedmask.bed"
 	threads:
 		config["n_cores"]
 	shell: """
@@ -72,31 +71,33 @@ rule edit_mask_files:
 rule create_fasta:
 	input:
 		ref=REF_GENOM,
-		mask="data/output/called/editedmasks/{sample}.editedmask.bed",
+		mask="data/output/called/stringent_masks/editedmasks/{sample}.editedmask.bed",
 		vcf="data/output/called/vcf_extracted_SNP_INDELS/{sample}.variant.vcf.gz"
 	output:
-		"data/output/called/fasta_marked_indels/initial/{sample}.fasta"
+		"data/output/called/stringent_fasta/initial/{sample}.fasta"
 	shell: """
-	bcftools consensus --mark-del "*" --mark-ins lc -m {input.mask} -o {output} -f {input.ref} {input.vcf} 
+	bcftools consensus -m {input.mask} -o {output} -f {input.ref} {input.vcf}
 	"""
 
 # exclude all plasmids and write sample name to the chromosome name
+#also replace asterisks with dashes
 rule edit_fasta:
 	input:
-		"data/output/called/fasta_marked_indels/initial/{sample}.fasta"
+		"data/output/called/stringent_fasta/initial/{sample}.fasta"
 	output:
-		"data/output/called/fasta_marked_indels/edited/{sample}.fasta"
+		"data/output/called/stringent_fasta/edited/{sample}.fasta"
 	shell: """
 		samtools faidx {input} NC_017238.1 > {output}
+		printf '%s\n' '%s/\*/-/g' 'x' | ex {output}
 		sed -i "1s/.*/>NC_017238.1 {wildcards.sample}/"  {output}
 	"""
 
 # 7) create dictionary for fasta
 rule create_dict_for_fasta:
 	input:
-		"data/output/called/fasta_marked_indels/edited/{sample}.fasta"
+		"data/output/called/stringent_fasta/edited/{sample}.fasta"
 	output:
-		"data/output/called/fasta_marked_indels/edited/{sample}.dict"
+		"data/output/called/stringent_fasta/edited/{sample}.dict"
 	shell: """
 		picard CreateSequenceDictionary -R {input} -O {output}
 	"""

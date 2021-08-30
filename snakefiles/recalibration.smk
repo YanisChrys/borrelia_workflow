@@ -54,7 +54,7 @@ rule call_variants1:
 	threads:
 		config["n_cores"]
 	shell:
-		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
+		"gatk HaplotypeCaller --sample-ploidy 1 --disable-spanning-event-genotyping -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"
 		
 # create db
 rule genomicsdbimport1:
@@ -150,7 +150,7 @@ rule call_variants2:
 	threads:
 		config["n_cores"]
 	shell:
-		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"	
+		"gatk HaplotypeCaller --sample-ploidy 1 --disable-spanning-event-genotyping -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"	
         
 # create db
 rule genomicsdbimport2:
@@ -244,7 +244,7 @@ rule call_variants3:
 	threads:
 		config["n_cores"]
 	shell:
-		"gatk HaplotypeCaller --sample-ploidy 1 -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"	
+		"gatk HaplotypeCaller --sample-ploidy 1 --disable-spanning-event-genotyping -ERC GVCF -R {input.ref} -I {input.sample} -O {output}"	
         
 # create db
 rule genomicsdbimport3:
@@ -322,3 +322,22 @@ rule apply_bqsr3:
 		--create-output-bam-index \
 		-O {output}
 	"""
+	
+	
+# compare recalibration tables:
+
+rule level_1_recalibration_diagnostic:
+	input:
+		table1="data/output/recalibration1/{sample}.recalc.table",
+		table2="data/output/recalibration2/{sample}.recalc.table",
+		table3="data/output/recalibration3/{sample}.recalc.table"
+	output:
+		"triphasic_covariate_recalibration_diagnostics/{sample}.pdf"
+	shell: """
+		gatk AnalyzeCovariates \
+		-bqsr {input.table1} \
+		-before {input.table2}  \
+		-after {input.table3}  \
+		-plots {output}
+	"""
+

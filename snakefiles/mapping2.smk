@@ -140,7 +140,7 @@ rule mark_duplicates:
 
 # 9) Re-index final alignment and move to final output location:
 #  - Also see definition of FINAL_ALIGNMENTS constant in setup.smk, which makes this a terminal node
-rule finalise_aligment:
+rule finalise_alignment:
 	input:
 		"data/output/duplicates_marked/{run_id}/{sample}.bam",
 	output:
