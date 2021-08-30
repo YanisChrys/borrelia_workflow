@@ -1,0 +1,34 @@
+
+import csv
+import warnings
+
+AVAILABLE_FASTA = glob_wildcards("data/lenientfasta/{sample}.lenient.fasta")
+AVAILABLE_GENES = glob_wildcards("data/housekeeping_genes/{gene}_db")
+
+rule all:
+	input:
+		expand("data/output/allelic_profiles/{sample}/{sample}_{gene}.txt",sample=AVAILABLE_FASTA.sample, gene=AVAILABLE_GENES.gene)
+
+
+rule make_database:
+	input:
+		"data/housekeeping_genes/{gene}_db/{gene}.fasta"
+	output:
+		"data/housekeeping_genes/{gene}_db/{gene}.ndb"
+	shell: """
+		makeblastdb -in {input} -out "data/housekeeping_genes/{wildcards.gene}_db/{wildcards.gene}" -dbtype nucl
+	"""
+
+#blastn each sample to every gene
+rule BlastN:
+	input:
+		fasta="data/lenientfasta/{sample}.lenient.fasta",
+		db="data/housekeeping_genes/{gene}_db/{gene}.ndb"
+	output:
+		"data/output/allelic_profiles/{sample}/{sample}_{gene}.txt"
+	shell: """
+		blastn -query {input.fasta} -out {output} -db "data/housekeeping_genes/{wildcards.gene}_db/{wildcards.gene}"  -outfmt 0 -max_target_seqs 10 -dust no -word_size 15
+		wait
+	"""
+
+
