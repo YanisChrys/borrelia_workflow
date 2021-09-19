@@ -6,8 +6,6 @@ Can be installed in a linux system with miniconda3 (https://docs.conda.io/projec
 conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
-conda install bedops
-conda install blast
 
 conda env create -f envs/environ_2.yml -n borrelia
 ```
