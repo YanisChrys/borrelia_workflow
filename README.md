@@ -27,7 +27,7 @@ snakemake --use-conda --cores 4 all
 create a schematic representation of all jobs with:
 
 ```
-snakemake --forceall --dag | dot -Tpdf > dag2.pdf
+snakemake --forceall --dag | dot -Tpdf > dag_of_jobs.pdf
 ```
 
 Pipeline for reference mapping and variant calling of _Borrelia_ samples. Two types of fasta consensus sequences are created with `bcftools consensus`. (interesting recent alternative: `VCFCons`)
