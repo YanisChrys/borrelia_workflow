@@ -1,0 +1,23 @@
+# Main environment shared by most steps
+name: borrelia_workflow
+
+channels:
+- conda-forge
+- bioconda
+
+dependencies:
+# External tools:
+- snakemake=6.6.1
+- bwa=0.7.17
+- samtools=1.13
+- picard=2.25.7
+- bcftools=1.13
+- vcftools=0.1.16
+- gatk4=4.2.1.0
+- readline
+- r-reshape
+- r-gsalib
+- r-gplots
+- r-ggplot2
+- bedops
+- plink 
