@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# methodology for alignment:
+# find samples with more than 50% genotyped data and use them with mainland samples to build an alignment
+# 
+
+##### find good samples:
+#get samples with more than 50 genotyping rate : results 18 samples with average rate: ~72%
+plink --vcf data/output/called/filtered/allsites.filtered.vcf --make-bed --chr-set 18 no-xy  --mind 0.5 --allow-extra-chr --out all.borrelia.filtered 
+
+#extract names
+cut -f1 all.borrelia.filtered.fam > samples_more_than_0.5mind.txt
+
+# copy the paths to the above samples to a variable and copy them to a new directory
+myfiles=$(grep -f <(cat samples_more_than_05mind.txt) <(ls data/output/called/lenientfasta/edited/*.fasta))
+mkdir data/output/called/lenientfasta/finalsamples && cp "$myfiles" data/output/called/lenientfasta/finalsamples
+
+# combine them to a single fasta file and use that to align the genomes
+cat data/output/Mauve/finalsamples/*fasta > data/output/Mauve/finalsamples/all_island_samples_to_use.fasta
+
+# align genomes
+# options:
+
+# large: uses a temporary directory to reduce RAM use
+# thread 6: number of cores to use
+# quiet: don't print log to the screen
+# ep & op: default gap extension and open penalties for when we don't want large gaps
+# retree & maxiterate: options for alignment improvement - balance between accuracy and speed
+# add: by adding the samples to the reference we use the reference as a skeleton on which to align the samples; increases accuracy
+mafft --large --leavegappyregion --quiet --thread 6 --ep 0.123 --op 1.53 --retree 2 --maxiterate 2 --add all_island_samples_to_use.fasta Bafzelii_Chr_WithRef_L19removed.fasta  > island_mainland_all_alignment.fasta &
+
+# This alignment will inevitably create gappy regions due to the high number of Ns. These can be carefully edited out manually.
+
+
+
+
+
+
+
+
+# remove gaps:
+
+sed -i 's/-\{20\}//g' island_mainland_all_alignment
+
+
+# get sample name in a file
+for line in $(cat alignmentfilenames.txt); do cut -d'/' -f6 <<<$line | cut -d'.' -f1 >> alignmentfilenames2.txt; done
+
+# separate samples
+for sample in $(cat Bafzelii_Chr_WithRef_L19removed_samples.txt); do samtools faidx Bafzelii_Chr_WithRef_L19removed.fasta $sample > data/afzeliifasta/${sample}.fasta; done
+
+# replace spaces in file
+sed -i 's/ \{2,\}/ /g' data/output/afzelii_profiles/*.txt
+
+
+# replace > NUM with > SAMPLE in xmfa
+for index in {1..19}; do sample=$(sed "${index}q;d" samples_more_than_05mind.txt); sed -i "s/> ${index}:/> ${sample}:/" data/output/Mauve/aligned_final_samples/aligned_collinear_final.xmfa; done
+
+
+
+
+
+
+# get gariniir reference
+https://www.ncbi.nlm.nih.gov/assembly/GCF_001922545.1/
+#curl ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/bacteria/Borreliella_garinii/latest_assembly_versions/GCF_000172595.4_ASM17259v2/GCF_000172595.4_ASM17259v2_genomic.fna.gz > garinii.fasta.gz
+#bgzip -d garinii.fasta.gz > garinii.fasta
