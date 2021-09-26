@@ -67,6 +67,8 @@ conda create --name snp-sites -c bioconda snp-sites
 conda env create -f envs/mlst_env.yml -n mlst_env
 
 conda create --name beast -c bioconda beast
+
+conda create -n beast2 -c conda-forge -c bioconda beast2
 ```
 
 Whenever a program needs to run, the appropriate environment should simply be activated.
