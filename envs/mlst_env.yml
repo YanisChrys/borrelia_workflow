@@ -1,0 +1,12 @@
+# Main environment shared by most steps
+name: mlst
+
+channels:
+- defaults
+- conda-forge
+- bioconda
+
+dependencies:
+# External tools:
+- snakemake=6.6.1
+- blast=2.12
