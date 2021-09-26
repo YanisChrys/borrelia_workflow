@@ -1,0 +1,45 @@
+import csv
+import warnings
+
+# get samples and gene names as wildcards
+AVAILABLE_FASTA = glob_wildcards("data/borrelia_samples/{sample}.fasta")
+AVAILABLE_GENES = glob_wildcards("data/housekeeping_genes/{gene}_db")
+
+# terminal node
+rule all:
+	input:
+		expand("data/output/allelic_profiles/{sample}/top/{gene}.top5.txt", sample=AVAILABLE_FASTA.sample, gene=AVAILABLE_GENES.gene)
+
+# create 1 blast database per housekeeping gene
+rule make_database:
+	input:
+		"data/housekeeping_genes/{gene}_db/{gene}.fasta"
+	output:
+		"data/housekeeping_genes/{gene}_db/{gene}.ndb"
+	shell: """
+		makeblastdb -in {input} -out "data/housekeeping_genes/{wildcards.gene}_db/{wildcards.gene}" -dbtype nucl
+	"""
+
+# blastn each sample to every gene and wait for it to finish
+rule BlastN:
+	input:
+		fasta="data/borrelia_samples/{sample}.fasta",
+		db="data/housekeeping_genes/{gene}_db/{gene}.ndb"
+	output:
+		"data/output/allelic_profiles/{sample}/{sample}_{gene}.txt"
+	shell: """
+		blastn -query {input.fasta} -out {output} -db "data/housekeeping_genes/{wildcards.gene}_db/{wildcards.gene}"  -outfmt 0 -max_target_seqs 10 -dust no -word_size 15
+		wait
+	"""
+
+# collect top 5 matches for each gene to a file
+rule collectInfo:
+	input:
+		"data/output/allelic_profiles/{sample}/{sample}_{gene}.txt"
+	output:
+		"data/output/allelic_profiles/{sample}/top/{gene}.top5.txt"
+	shell: """
+		grep "^{wildcards.gene}_"  {input}  | head -n5  > {output}
+		sed -i 's/ \{{2,\}}/ /g' {output}
+	"""
+
