@@ -30,11 +30,12 @@ create a schematic representation of all jobs with:
 snakemake -s MY_SNAKEFILE --forceall --dag | dot -Tpdf > graph_of_jobs.pdf
 ```
 
-Pipeline for reference mapping and variant calling of _Borrelia_ samples. Two types of fasta consensus sequences are created with `bcftools consensus`. (interesting recent alternative: `VCFCons`)
 
  - For the consensus genomes:
 
-The reference genome needs to be unzipped, indexed and placed inside `data/ref_genom/` and the input bam files are placed under `data/input/multi_refs`. All other files and folder are created by snakemake.
+snakefile_vc: Pipeline for reference mapping and variant calling of _Borrelia_ samples. Two types of fasta consensus sequences are created with `bcftools consensus` (interesting recent alternative: `VCFCons`) and one plink bedfile for the stricter filtering.
+
+The reference genome needs to be unzipped, indexed and placed inside `data/ref_genom/` and the input bam files are placed under `data/input/multi_refs`. All other files and folders are created by snakemake. NOTE: reference file name is searched exactly, if running verify that all file names are the same or change the names in the code.
 
 The mapping uses `bwa mem` and the variant calling uses `gatk HaplotypeCaller` in gVCF mode.
 
