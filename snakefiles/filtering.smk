@@ -58,9 +58,7 @@ rule SNP_filtration:
 		--filter-expression "ReadPosRankSum < -8.0" \
 		--filter-name "RPRS8" \
 		--filter-expression "QUAL < 30.0" \
-		--filter-name "QUAL30" \
-		--filter-expression "DP < 2.0 " \
-		--filter-name "DP2" 
+		--filter-name "QUAL30"
 		"""
 
 
@@ -86,9 +84,7 @@ rule INDEL_filtration:
 		--filter-expression "ReadPosRankSum < -20.0" \
 		--filter-name "RPRS20" \
 		--filter-expression "QUAL < 30.0" \
-		--filter-name "QUAL30" \
-		--filter-expression "DP < 2.0 " \
-		--filter-name "DP2" 
+		--filter-name "QUAL30"
 		"""
 
 # 4) merge vcfs with same number of samples but different sites
