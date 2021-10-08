@@ -2,24 +2,9 @@
 
 # Create partitions where all gaps are removed and then sites are kept depending on their amount of coverage (50-100%)
 
-####### keep only variant sites
-# citation:
-#"SNP-sites: rapid efficient extraction of SNPs from multi-FASTA alignments",
-#Andrew J. Page, Ben Taylor, Aidan J. Delaney, Jorge Soares, Torsten Seemann, Jacqueline A. Keane, Simon R. Harris,
-#Microbial Genomics 2(4), (2016). http://dx.doi.org/10.1099/mgen.0.000056
 
+####### keep all sites with no missing data
 
-####### keep only variant sites
-snp-sites -o island_mainland_all_trimmed.fasta island_mainland_all_alignment.fasta
-
-
-####### keep all variants with no missing data
-# delete gaps with trimAL:
-trimal -gt 1 -in island_mainland_all_trimmed.fasta -out island_mainland_all_trimmed_267.fasta
-
-
-####### keep variant and invariant sites with no missing data
-cp island_mainland_all_alignment.fasta island_mainland_all_alignment_copy.fasta
 # replace Ns with gaps, will later remove them all
 sed -i 's/N/-/g' island_mainland_all_alignment_copy.fasta
-trimal -gt 1 -in island_mainland_all_alignment_copy.fasta -out island_mainland_all_alignment_complete_deletion.fasta
+trimal -gt 1 -in island_mainland_all_alignment.fasta -out island_mainland_all_alignment_complete_deletion.fasta
