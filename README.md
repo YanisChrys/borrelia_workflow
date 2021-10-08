@@ -56,7 +56,7 @@ sudo apt-get update -y
 sudo apt-get install -y phyml
 ```
 
-trimAL (http://trimal.cgenomics.org/), mafft (https://mafft.cbrc.jp/alignment/software/algorithms/algorithms.html), beast (https://beast.community/), snp-sites (https://github.com/sanger-pathogens/snp-sites) and the MLST analysis run better in conda:
+trimAL (http://trimal.cgenomics.org/), mafft (https://mafft.cbrc.jp/alignment/software/algorithms/algorithms.html), beast (https://beast.community/) and the MLST analysis run better in conda:
 ```
 conda create --name trimal -c bioconda trimal
 
