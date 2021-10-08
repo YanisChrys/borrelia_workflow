@@ -10,32 +10,12 @@
 # -g numberOfRateCategories Include models with rate variation among sites and sets the number of categories. Usually 4 categories are enough.
 # -i : Include models with a proportion invariable sites.
 
-# model for variant sites dataset
-java -jar ~/jmodeltest-2.1.10/jModelTest.jar -AICc -tr 4 -g 4 -i -f  -a -d island_mainland_all_trimmed.fasta -o data/output/model_selection/all_SNP &
-
-# model for full  dataset
-java -jar ~/jmodeltest-2.1.10/jModelTest.jar -AICc -tr 4 -g 4 -i -f  -a -d island_mainland_all.fasta -o data/output/model_selection/full_alignment &
-
-# model for variant sites with no missing data
-java -jar ~/jmodeltest-2.1.10/jModelTest.jar -AICc -tr 4 -g 4 -i -f  -a -d island_mainland_all_trimmed_267.fasta -o data/output/model_selection/267 &
-
 # model for variant and invariant sites with no missing data
 java -jar ~/jmodeltest-2.1.10/jModelTest.jar -AICc -tr 4 -g 4 -i -f  -a -d island_mainland_all_alignment_complete_deletion.fasta -o data/output/model_selection/complete_deletion &
-
-
 
 # compute ML phylogenetic tree
 
 # save as a phylip file in aliview and then:
-
-# do 1000 bootstraps of a kimura model 
-#"New Algorithms and Methods to Estimate Maximum-Likelihood Phylogenies: Assessing the Performance of PhyML 3.0."
-#Guindon S., Dufayard J.F., Lefort V., Anisimova M., Hordijk W., Gascuel O.
-#Systematic Biology, 59(3):307-21, 2010.
-phyml -i island_mainland_all_trimmed_267.phy -q -b 1000 -m K80 &
-
-
-
 
 # -b: 1000 bootstraps
 # -m: use GTR model estimated with jmodeltest
