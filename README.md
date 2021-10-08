@@ -77,3 +77,5 @@ Additional scripts:
 `02_alignment_partitions.txt` : uses trimAL to remove sites with missing data
 
 `03_modeltest_and_phyml.sh`: use jmodeltest to find substitution model and phyml to create ml tree
+
+`04_trees_MLST.R`: R plots
