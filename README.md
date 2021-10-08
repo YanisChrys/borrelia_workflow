@@ -76,5 +76,7 @@ Whenever a program needs to run, the appropriate environment should simply be ac
 Additional scripts:
 
 `01_alignment_commands.txt: find samples with high genotyping rate and perform mafft alignment`
+
 `02_alignment_partitions.txt : uses trimAL to remove sites with missing data`
+
 `03_modeltest_and_phyml.sh: use jmodeltest to find substitution model and phyml to create ml tree`
