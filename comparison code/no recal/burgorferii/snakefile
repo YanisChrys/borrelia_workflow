@@ -1,0 +1,58 @@
+# Pipeline for mapping reads, calling variants and creating consensus genomes in fasta format.
+# Also produce plink bed files of variants
+
+# This script creates a variable with the samples to be processed, creates the "all" rule 
+# and calls the sub-processes of the pipeline
+
+import csv
+import warnings
+
+# Random seed:
+random_seed: 23102020
+
+n_cores = 2
+
+# index reference
+# tar -xvf genome_assemblies_genome_fasta.tar
+# mv FOLDER/GCF_000172595.4_ASM17259v2_genomic.fna.gz GCF_000172595.4_ASM17259v2_genomic.fasta.gz
+# bgzip -d GCF_000172595.4_ASM17259v2_genomic.fasta.gz
+# picard CreateSequenceDictionary -R REF_GENOME
+# bwa index REF_GENOM
+# samtools faidx REF_GENOME
+
+# save reference genome as a variable
+REF_GENOM = "data/ref_genom/GCF_000021405.1_ASM2140v1_genomic.fasta"
+
+# get samples and gene names as wildcards
+AVAILABLE_SAMPLES = glob_wildcards("data/input/raw_data/{sample}.bam")
+
+
+# Build a list of samples to process and where to find them
+# A single sample might be associated with multiple run_ids that can be later merged
+FINAL_SAMPLES = []
+
+for i in range(len(AVAILABLE_SAMPLES.sample)):
+	sample = AVAILABLE_SAMPLES.sample[i]
+	FINAL_SAMPLES.append(sample)
+
+
+# Sub-modules, each focusing on a specific task:
+include: "snakefiles/mapping.smk"
+include: "snakefiles/variant_calling.smk"
+include: "snakefiles/filtering.smk"
+include: "snakefiles/create_fasta.smk"
+include: "snakefiles/newfasta.smk"
+#include: "snakefiles/create_stringent_bed.smk"
+
+
+
+# Terminal node:
+rule all:
+	input:
+		expand("data/output/called/vcf_allsites/{sample}.allsites.vcf", sample=FINAL_SAMPLES),
+		expand("data/output/called/stringent_fasta/edited/{sample}.fasta", sample=FINAL_SAMPLES),
+		expand("data/output/called/lenientfasta/edited/{sample}.lenient.dict", sample=FINAL_SAMPLES),
+		#"data/output/called/stringent_bed/all_chrom_SNP_stringent"
+		expand("data/output/called/simple_fasta/edited/{sample}.simple.fasta", sample=FINAL_SAMPLES),
+		expand("data/output/called/simple_string_fasta/edited/{sample}.simple.fasta", sample=FINAL_SAMPLES)
+		
