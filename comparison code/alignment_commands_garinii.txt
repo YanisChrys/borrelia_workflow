@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# create input for alignment 
+# extract mapped samples and map the new one on them
+samtools faidx Bgarinii_Chr_WithRef.fasta M23E1 Pbr > M23_scaffold.fasta
+samtools faidx Bgarinii_Chr_WithRef.fasta N2E1 Pbr > N2_scaffold.fasta
+
+# align genomes
+# options:
+
+# large: uses a temporary directory to reduce RAM use
+# thread 6: number of cores to use
+# quiet: don't print log to the screen
+# ep & op: default gap extension and open penalties for when we don't want large gaps
+# retree & maxiterate: options for alignment improvement - balance between accuracy and speed
+# add: by adding the samples to the reference we use the reference as a skeleton on which to align the samples; increases accuracy
+mafft --retree 2 --maxiterate 1000 --quiet --leavegappyregion --thread 4 --ep 0.123 --op 1.53 --add RB-M23.simple.fasta M23_scaffold.fasta > M23_alignment.fasta &
+mafft --retree 5 --maxiterate 1000 --quiet --leavegappyregion --thread 4 --ep 0.123 --op 1.53  --add RB-N2.simple.fasta N2_scaffold.fasta  > N2_alignment.fasta &

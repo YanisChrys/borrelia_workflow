@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# create input for alignment 
+# extract mapped samples and map the new one on them
+samtools faidx Bburgdorferi_Chr_WithRef_WithGermanIso.fasta N6_2013 ZS7 > N6_scaffold.fasta
+samtools faidx Bburgdorferi_Chr_WithRef_WithGermanIso.fasta K42E1_2013 ZS7 > K42_scaffold.fasta
+samtools faidx Bburgdorferi_Chr_WithRef_WithGermanIso.fasta K41E1_2013 ZS7 > K41_scaffold.fasta
+
+RB-N6.simple.fasta
+RB-K41.simple.fasta
+RB-K42.simple.fasta
+
+# align genomes
+# options:
+
+# large: uses a temporary directory to reduce RAM use
+# thread 6: number of cores to use
+# quiet: don't print log to the screen
+# ep & op: default gap extension and open penalties for when we don't want large gaps
+# retree & maxiterate: options for alignment improvement - balance between accuracy and speed
+# add: by adding the samples to the reference we use the reference as a skeleton on which to align the samples; increases accuracy
+mafft --retree 2 --maxiterate 1000 --quiet --leavegappyregion --thread 4 --ep 0.123 --op 1.53 --add RB-N6.simple.fasta N6_scaffold.fasta > N6_alignment.fasta &
+mafft --retree 5 --maxiterate 1000 --quiet --leavegappyregion --thread 4 --ep 0.123 --op 1.53  --add RB-K41.simple.fasta K41_scaffold.fasta  > K41_alignment.fasta &
+mafft --retree 5 --maxiterate 1000 --quiet --leavegappyregion --thread 4 --ep 0.123 --op 1.53  --add RB-K42.simple.fasta K42_scaffold.fasta  > K42_alignment.fasta &

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Create partitions where all gaps are removed and then sites are kept depending on their amount of coverage (50-100%)
+
+####### keep only variant sites
+# citation:
+#"SNP-sites: rapid efficient extraction of SNPs from multi-FASTA alignments",
+#Andrew J. Page, Ben Taylor, Aidan J. Delaney, Jorge Soares, Torsten Seemann, Jacqueline A. Keane, Simon R. Harris,
+#Microbial Genomics 2(4), (2016). http://dx.doi.org/10.1099/mgen.0.000056
+
+
+####### keep only variant sites
+snp-sites -o N6_snps_alignment.fasta N6_alignment.fasta
+snp-sites -o K41_snps_alignment.fasta K41_alignment.fasta
+snp-sites -o K42_snps_alignment.fasta K41_alignment.fasta
+
+
